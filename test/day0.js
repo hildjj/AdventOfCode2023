@@ -1,1 +1,1 @@
-export default [ 2000, 4742881n ]
+export default [2000, 4742881n];
