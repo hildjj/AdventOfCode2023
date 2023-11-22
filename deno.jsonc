@@ -1,0 +1,52 @@
+{
+  "tasks": {
+    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+    "dev": "deno run --watch main.ts",
+    "test": "rm -rf coverage && deno test -A --unstable --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*' && genhtml -o coverage/html --ignore-errors unmapped coverage/lcov.info",
+    "ci": "deno test --unstable -A --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info",
+    "update": "deno run -A https://deno.land/x/udd/main.ts deno.jsonc --dry-run",
+    "build": "deno run -A dev.ts build",
+    "preview": "deno run -A main.ts"
+  },
+  "imports": {
+    "$jar": "https://deno.land/x/another_cookiejar@v5.0.3/mod.ts",
+    "$curlcookie": "https://esm.sh/curlcookie@0.0.5",
+    "$peggy": "https://esm.sh/peggy@3.0.2",
+    "$std/": "https://deno.land/std@0.207.0/"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "exclude": ["woords/phdef.js", "deno_modules/"]
+  },
+  "lint": {
+    "exclude": ["woords/phdef.js", "deno_modules/"],
+    "rules": {
+      "tags": ["fresh", "recommended"],
+      "exclude": ["no-await-in-loop"],
+      "include": [
+        "ban-untagged-todo",
+        "camelcase",
+        "default-param-last",
+        "eqeqeq",
+        "explicit-function-return-type",
+        "explicit-module-boundary-types",
+        "guard-for-in",
+        "no-const-assign",
+        "no-eval",
+        "no-external-import",
+        "no-implicit-declare-namespace-export",
+        "no-non-null-asserted-optional-chain",
+        "no-sparse-arrays",
+        "no-sync-fn-in-async-fn",
+        "no-throw-literal"
+      ]
+    }
+  },
+  "lock": false,
+  "exclude": ["**/_fresh/*"]
+}
