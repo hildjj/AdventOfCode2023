@@ -4,7 +4,7 @@ import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
 import { parse as parseFlags } from '$std/flags/mod.ts';
-import { Utils, type MainEntry } from './utils.ts';
+import { type MainEntry, Utils } from './utils.ts';
 import { Cookie, CookieJar, CookieOptions, wrapFetch } from '$jar';
 
 const YEAR = 2023;
@@ -37,14 +37,14 @@ Options:
   -h,--help         Print help text and exit
   -r,--record       Record results as test data
   -t,--test         Check test results
-  -T,--trace        Turn on grammar tracing`)
+  -T,--trace        Turn on grammar tracing`);
   Deno.exit(64);
 }
 
 const template: string[] = [];
 
 function wait(ms: number): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (ms <= 0) {
       resolve();
     } else {
@@ -81,18 +81,24 @@ if (args.new) {
   }
 
   const jsonJar = await getCookieJar('.cookies');
-  const cookieJar = new CookieJar(Object.values(jsonJar).map(c => new Cookie(c as CookieOptions)));
-  const fetch = wrapFetch({cookieJar});
+  const cookieJar = new CookieJar(
+    Object.values(jsonJar).map((c) => new Cookie(c as CookieOptions)),
+  );
+  const fetch = wrapFetch({ cookieJar });
 
   await Utils.exec('open', `https://adventofcode.com/${YEAR}/day/${args.day}`);
 
   if (!args.nowait) {
-    const d = new Date(Date.UTC(2023, 11, parseInt(args.day, 10), 5, 0, 0, 300));
+    const d = new Date(
+      Date.UTC(2023, 11, parseInt(args.day, 10), 5, 0, 0, 300),
+    );
     console.log(`Waiting until ${d.toISOString()}`);
     await wait(d.getTime() - Date.now());
   }
 
-  const res = await fetch(`https://adventofcode.com/${YEAR}/day/${args.day}/input`)
+  const res = await fetch(
+    `https://adventofcode.com/${YEAR}/day/${args.day}/input`,
+  );
   const input = await res.text();
 
   await Utils.exec('git', 'co', '-b', `day${args.day}`);
@@ -121,15 +127,18 @@ const mod = (await import(
 try {
   const results = await mod(args);
   if (args.record) {
+    const str = Deno.inspect(results, {
+      colors: false,
+      compact: true,
+      depth: Infinity,
+      iterableLimit: Infinity,
+      strAbbreviateSize: Infinity,
+      trailingComma: true,
+    }).replaceAll('[ ', '[').replaceAll(' ]', ']');
+
     await Deno.writeTextFile(
       Utils.adjacentFile(args, 'js', 'test'),
-      'export default ' +
-        Deno.inspect(results, {
-          colors: false,
-          compact: true,
-          depth: Infinity,
-          iterableLimit: Infinity
-        })
+      `export default ${str};\n`,
     );
   }
 
@@ -142,6 +151,8 @@ try {
     colors: Deno.isatty(Deno.stdout.rid),
     depth: Infinity,
     iterableLimit: Infinity,
+    strAbbreviateSize: Infinity,
+    trailingComma: true,
   }));
 } catch (er) {
   if (!er.format) {

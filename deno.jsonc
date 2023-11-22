@@ -1,8 +1,8 @@
 {
   "tasks": {
-    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+    "check": "deno fmt --check && deno lint && deno check **/*.ts **/*.js",
     "dev": "deno run --watch main.ts",
-    "test": "rm -rf coverage && deno test -A --unstable --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*' && genhtml -o coverage/html --ignore-errors unmapped coverage/lcov.info",
+    "test": "rm -rf coverage && deno test -A --unstable --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*' && genhtml -o coverage/html --ignore-errors unmapped coverage/lcov.info > /dev/null",
     "ci": "deno test --unstable -A --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info",
     "update": "deno run -A https://deno.land/x/udd/main.ts deno.jsonc --dry-run",
     "build": "deno run -A dev.ts build",

@@ -1,7 +1,6 @@
-import { dirname, extname, fromFileUrl, join } from '$std/path/mod.ts';
+import { dirname, fromFileUrl, join } from '$std/path/mod.ts';
 import { TextLineStream } from '$std/streams/mod.ts';
 import peggy from '$peggy';
-import { parse as parseFlags } from '$std/flags/mod.ts';
 
 export interface MainArgs {
   trace: boolean;
@@ -12,15 +11,16 @@ export interface MainArgs {
 
 export type MainEntry<T> = (args: MainArgs) => Promise<T>;
 
+export const defaultArgs: MainArgs = {
+  trace: false,
+  day: '0',
+  _: [],
+};
+
 /**
  * Utility functions.
  */
 export class Utils {
-  static #stripExt(p: string): string {
-    const ext = extname(p);
-    return ext ? p.slice(0, -ext.length) : p;
-  }
-
   /**
    * Read file, parse lines.
    *
@@ -33,7 +33,7 @@ export class Utils {
     filename?: string,
   ): AsyncGenerator<string> {
     if (!filename) {
-      filename = this.adjacentFile(args, '.txt', 'inputs');
+      filename = this.adjacentFile(args, 'txt', 'inputs');
     }
 
     const f = await Deno.open(filename);
@@ -96,11 +96,10 @@ export class Utils {
       }) as T;
     } catch (er) {
       if (typeof (er as peggy.GrammarError).format === 'function') {
-        console.error((er as peggy.GrammarError).format([
+        er.message = (er as peggy.GrammarError).format([
           { source, text: text! },
-        ]));
+        ]);
         er.stack = '';
-        er.message = '';
       }
       throw er;
     }
@@ -120,7 +119,7 @@ export class Utils {
     }
     const bin = args.shift() as string;
     const cmd = new Deno.Command(bin, {
-      args
+      args,
     });
     const status = await cmd.spawn().status;
     if (!status.success) {
@@ -186,7 +185,9 @@ export class Utils {
         return n[0];
       case 2: {
         let [a, b] = n;
-        while (b !== 0) {
+        // Needs to work for both 0 and 0n
+        // deno-lint-ignore eqeqeq
+        while (b != 0) {
           [a, b] = [b, Utils.mod(a, b)];
         }
         return a;
@@ -203,9 +204,5 @@ export class Utils {
       (t, v) => (((t * v) as T) / this.gcd(t, v)) as T,
       ((typeof n[0] === 'number') ? 1 : 1n) as T,
     );
-  }
-
-  static deepCopy<T>(nest: T): T {
-    return structuredClone(nest);
   }
 }
