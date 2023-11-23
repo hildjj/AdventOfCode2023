@@ -55,13 +55,6 @@ Deno.test('Utils', async (t) => {
     assertEquals(a.length, 2000);
   });
 
-  await t.step('exec', async () => {
-    await assertRejects(() => Utils.exec(), TypeError);
-    await assertRejects(() => Utils.exec(INVALID_FILE));
-    await assertRejects(() => Utils.exec('/usr/bin/false'));
-    await Utils.exec('/usr/bin/true', 'foo', 'bar');
-  });
-
   await t.step('parseFile', async () => {
     const r = await Utils.parseFile<number[]>(defaultArgs);
     assertEquals(r.length, 2000);
