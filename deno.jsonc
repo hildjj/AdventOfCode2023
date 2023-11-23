@@ -5,8 +5,7 @@
     "test": "rm -rf coverage && deno test -A --unstable --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*' && genhtml -o coverage/html --ignore-errors unmapped coverage/lcov.info > /dev/null",
     "ci": "deno test --unstable -A --coverage=coverage && deno coverage coverage --lcov --output=coverage/lcov.info",
     "update": "deno run -A https://deno.land/x/udd/main.ts deno.jsonc --dry-run",
-    "build": "deno run -A dev.ts build",
-    "preview": "deno run -A main.ts"
+    "docs": "deno doc --html --name=AdventOfCode2023 counter.ts ocr.ts  sequence.ts  utils.ts"
   },
   "imports": {
     "$jar": "https://deno.land/x/another_cookiejar@v5.0.3/mod.ts",
@@ -21,10 +20,10 @@
     "semiColons": true,
     "singleQuote": true,
     "proseWrap": "preserve",
-    "exclude": ["woords/phdef.js", "deno_modules/"]
+    "exclude": ["woords/phdef.js", "docs"]
   },
   "lint": {
-    "exclude": ["woords/phdef.js", "deno_modules/"],
+    "exclude": ["woords/phdef.js", "docs"],
     "rules": {
       "tags": ["fresh", "recommended"],
       "exclude": ["no-await-in-loop"],
@@ -47,6 +46,5 @@
       ]
     }
   },
-  "lock": false,
-  "exclude": ["**/_fresh/*"]
+  "lock": false
 }

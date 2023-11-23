@@ -1626,5 +1626,3 @@ export class NumberSequence extends Sequence<number> {
     return new NumberSequence(super.take(n).it, n);
   }
 }
-
-export default Sequence;

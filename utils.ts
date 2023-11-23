@@ -24,6 +24,7 @@ export class Utils {
   /**
    * Read file, parse lines.
    *
+   * @param args - Args passed in to day.ts
    * @param filename - If null, figures out what day today is
    *   and finds the .txt file.
    * @returns One entry per line.
@@ -46,6 +47,25 @@ export class Utils {
         yield s;
       }
     }
+  }
+
+  /**
+   * Read all non-blank lines from a file, returning an array.
+   *
+   * @param args - Args passed in to day.ts
+   * @param filename - If null, figures out what day today is
+   *   and finds the .txt file.
+   * @returns One entry per line.
+   */
+  static async readAllLines(
+    args: MainArgs,
+    filename?: string,
+  ): Promise<string[]> {
+    const res: string[] = [];
+    for await (const line of this.readLines(args, filename)) {
+      res.push(line);
+    }
+    return res;
   }
 
   /**
