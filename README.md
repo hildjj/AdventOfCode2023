@@ -25,15 +25,15 @@ Waiting until 2023-12-01T05:00:00.300Z
 
 ## Writing your solution
 
-Each AoC puzzle consists of two related problems.  Usually the first one is
+Each AoC puzzle consists of two related problems. Usually the first one is
 trying to get you to solve the puzzle in an obvious way, and the second part
 blows up in complexity, runtime, memory, etc. if you took the wrong path --
 particularly later in the month.
 
 Every puzzle has an input file that is specific to you, which will be written
-to `inputs/day1.txt` (e.g.).  The first task of the day is always parsing this
-file.  If we are lucky, you can use `Utils.readAllLines()` to get all of the
-blank lines.  If not, I write a quick [Peggy](https://peggyjs.org/) parser.
+to `inputs/day1.txt` (e.g.). The first task of the day is always parsing this
+file. If we are lucky, you can use `Utils.readAllLines()` to get all of the
+blank lines. If not, I write a quick [Peggy](https://peggyjs.org/) parser.
 
 In `day1.ts` (e.g.), you parse the input file once in the main function, then
 write your `part1` and `part2` solutions in the appropriate functions.
@@ -68,9 +68,9 @@ The `utils.ts` file has a bunch of random stuff that I find myself needing,
 like lowest-common-denominator and greatest-common-multiple routines.
 
 The `counter.ts` is a bag of string=>number counters that deal with inserting
-1 the first time and incrementing from there.  This comes up a lot.
+1 the first time and incrementing from there. This comes up a lot.
 
-The `sequence.ts` file does a *bunch* of sequence munging.  If you need
+The `sequence.ts` file does a _bunch_ of sequence munging. If you need
 combinations or permutations, start there.
 
 ## Running

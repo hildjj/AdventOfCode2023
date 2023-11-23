@@ -20,10 +20,10 @@
     "semiColons": true,
     "singleQuote": true,
     "proseWrap": "preserve",
-    "exclude": ["woords/phdef.js", "deno_modules/"]
+    "exclude": ["woords/phdef.js", "docs"]
   },
   "lint": {
-    "exclude": ["woords/phdef.js", "deno_modules/"],
+    "exclude": ["woords/phdef.js", "docs"],
     "rules": {
       "tags": ["fresh", "recommended"],
       "exclude": ["no-await-in-loop"],
@@ -46,6 +46,5 @@
       ]
     }
   },
-  "lock": false,
-  "exclude": ["**/_fresh/*"]
+  "lock": false
 }
