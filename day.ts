@@ -33,7 +33,7 @@ day.ts [options] [ARGS]
 ARGS passed to day's main function as args._
 
 Options:
-  -d,--day [number] Day (default: latest day unless --new)
+  -d,--day <number> Day (default: latest day unless --new)
   -h,--help         Print help text and exit
   -r,--record       Record results as test data
   -t,--test         Check test results
@@ -86,8 +86,6 @@ if (args.new) {
   );
   const fetch = wrapFetch({ cookieJar });
 
-  await Utils.exec('open', `https://adventofcode.com/${YEAR}/day/${args.day}`);
-
   if (!args.nowait) {
     const d = new Date(
       Date.UTC(2023, 11, parseInt(args.day, 10), 5, 0, 0, 300),
@@ -96,6 +94,7 @@ if (args.new) {
     await wait(d.getTime() - Date.now());
   }
 
+  await Utils.exec('open', `https://adventofcode.com/${YEAR}/day/${args.day}`);
   const res = await fetch(
     `https://adventofcode.com/${YEAR}/day/${args.day}/input`,
   );
