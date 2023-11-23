@@ -95,9 +95,11 @@ ARGS passed to day's main function as args._
 Options:
   -d,--day <number> Day (default: latest day unless --new)
   -h,--help         Print help text and exit
+  -n,--new          Wait until drop time, then scaffold today's solution
   -r,--record       Record results as test data
   -t,--test         Check test results
   -T,--trace        Turn on grammar tracing
+  --nowait          Do not wait until drop time, for testing
 ```
 
 [![Test](https://github.com/hildjj/AdventOfCode2023/actions/workflows/deno.yml/badge.svg)](https://github.com/hildjj/AdventOfCode2023/actions/workflows/deno.yml)

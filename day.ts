@@ -1,5 +1,6 @@
 #!/usr/bin/env -S deno run -A --unstable
 
+import $ from '$dax';
 import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
@@ -35,9 +36,11 @@ ARGS passed to day's main function as args._
 Options:
   -d,--day <number> Day (default: latest day unless --new)
   -h,--help         Print help text and exit
+  -n,--new          Wait until drop time, then scaffold today's solution
   -r,--record       Record results as test data
   -t,--test         Check test results
-  -T,--trace        Turn on grammar tracing`);
+  -T,--trace        Turn on grammar tracing
+  --nowait          Do not wait until drop time, for testing`);
   Deno.exit(64);
 }
 
@@ -94,16 +97,16 @@ if (args.new) {
     await wait(d.getTime() - Date.now());
   }
 
-  await Utils.exec('open', `https://adventofcode.com/${YEAR}/day/${args.day}`);
+  await $`open https://adventofcode.com/${YEAR}/day/${args.day}`;
   const res = await fetch(
     `https://adventofcode.com/${YEAR}/day/${args.day}/input`,
   );
   const input = await res.text();
 
-  await Utils.exec('git', 'co', '-b', `day${args.day}`);
+  await $`git co -b day${args.day}`;
   const inputFile = Utils.adjacentFile(args, 'txt', 'inputs');
   await Deno.writeTextFile(inputFile, input);
-  await Utils.exec('code', inputFile);
+  await $`code ${inputFile}`;
 
   const copies = template.map((f) => [
     new URL(f, import.meta.url),
@@ -114,7 +117,7 @@ if (args.new) {
   await Promise.all(copies.map(([from, to]) => Deno.copyFile(from, to)));
 
   for (const [_from, to] of copies) {
-    await Utils.exec('code', fromFileUrl(to));
+    await $`code ${fromFileUrl(to)}`;
   }
   Deno.exit(0);
 }

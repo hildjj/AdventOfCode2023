@@ -8,6 +8,7 @@
     "docs": "deno doc --html --name=AdventOfCode2023 counter.ts ocr.ts  sequence.ts  utils.ts"
   },
   "imports": {
+    "$dax": "https://deno.land/x/dax@0.35.0/mod.ts",
     "$jar": "https://deno.land/x/another_cookiejar@v5.0.3/mod.ts",
     "$curlcookie": "https://esm.sh/curlcookie@0.0.5",
     "$peggy": "https://esm.sh/peggy@3.0.2",

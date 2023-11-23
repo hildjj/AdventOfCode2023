@@ -133,20 +133,6 @@ export class Utils {
     return join(p, ...dir, `day${args.day}.${ext}`);
   }
 
-  static async exec(...args: string[]): Promise<void> {
-    if (args.length < 1) {
-      throw new TypeError('No args');
-    }
-    const bin = args.shift() as string;
-    const cmd = new Deno.Command(bin, {
-      args,
-    });
-    const status = await cmd.spawn().status;
-    if (!status.success) {
-      throw new Error(`${bin} failed`);
-    }
-  }
-
   /**
    * Modulo, minus the JS bug with negative numbers.
    * `-5 % 4` should be `3`, not `-1`.
