@@ -50,6 +50,11 @@ Deno.test('Utils', async (t) => {
     assertEquals(count, 2000);
   });
 
+  await t.step('readAllLines', async () => {
+    const a = await Utils.readAllLines(defaultArgs);
+    assertEquals(a.length, 2000);
+  });
+
   await t.step('exec', async () => {
     await assertRejects(() => Utils.exec(), TypeError);
     await assertRejects(() => Utils.exec(INVALID_FILE));
