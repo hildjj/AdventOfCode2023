@@ -34,7 +34,11 @@ export class Utils {
     filename?: string,
   ): AsyncGenerator<string> {
     if (!filename) {
-      filename = this.adjacentFile(args, 'txt', 'inputs');
+      if (args._.length > 0) {
+        filename = String(args._[0]);
+      } else {
+        filename = this.adjacentFile(args, 'txt', 'inputs');
+      }
     }
 
     const f = await Deno.open(filename);
@@ -106,7 +110,14 @@ export class Utils {
           grammarSource: source,
         }).parse;
       }
-      source = input ?? this.adjacentFile(args, 'txt', 'inputs');
+      source = input;
+      if (!source) {
+        if (args._.length > 0) {
+          source = String(args._[0]);
+        } else {
+          source = this.adjacentFile(args, 'txt', 'inputs');
+        }
+      }
       text = await Deno.readTextFile(source);
 
       return parserFunc(text, {
