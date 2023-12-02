@@ -4,13 +4,13 @@ import $ from '$dax';
 import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
-import { parse as parseFlags } from '$std/flags/mod.ts';
+import { parseArgs } from '$std/cli/parse_args.ts';
 import { type MainEntry, Utils } from './utils.ts';
 import { Cookie, CookieJar, CookieOptions, wrapFetch } from '$jar';
 
 const YEAR = 2023;
 
-const args = parseFlags(Deno.args, {
+const args = parseArgs(Deno.args, {
   boolean: ['help', 'new', 'record', 'test', 'trace', 'nowait'],
   string: ['day'],
   alias: {
