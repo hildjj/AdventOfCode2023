@@ -93,8 +93,9 @@ if (args.new) {
     const d = new Date(
       Date.UTC(2023, 11, parseInt(args.day, 10), 5, 0, 0, 300),
     );
-    console.log(`Waiting until ${d.toISOString()}`);
-    await wait(d.getTime() - Date.now());
+    const ms = d.getTime() - Date.now();
+    console.log(`Waiting until ${d.toISOString()} (${ms}ms)`);
+    await wait(ms);
   }
 
   await $`open https://adventofcode.com/${YEAR}/day/${args.day}`;
