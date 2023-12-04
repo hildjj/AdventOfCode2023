@@ -14,6 +14,11 @@ export class Counter<T = string> {
     yield* Object.entries(this.points);
   }
 
+  get(...vals: T[]): number | undefined {
+    const joined = String(vals);
+    return this.points[joined];
+  }
+
   /**
    * Add a thing.
    *
