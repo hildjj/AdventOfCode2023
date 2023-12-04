@@ -19,34 +19,36 @@ interface Num {
 
 type Entry = Sym | Num;
 
+function adjacent(num: Num, sym: Sym): boolean {
+  // num left or right of sym, already in same row
+  return (sym.loc.column === num.loc.column - 1) ||
+    (sym.loc.column === num.loc.column + num.len);
+}
+
+function stacked(num: Num, sym: Sym): boolean {
+  // num above or below sym, already in row above or below
+  return (sym.loc.column >= (num.loc.column - 1)) &&
+    (sym.loc.column <= (num.loc.column + num.len));
+}
+
 function near(
-  len: number,
-  loc: Location,
+  num: Num,
   lineSyms: Record<number, Sym[]>,
 ): boolean {
   // Left or right
-  for (const sym of (lineSyms[loc.line] ?? [])) {
-    if (sym.loc.column === loc.column - 1) {
-      return true;
-    }
-    if (sym.loc.column === loc.column + len) {
-      return true;
-    }
+  if ((lineSyms[num.loc.line] ?? []).some((sym) => adjacent(num, sym))) {
+    return true;
   }
   // Num above or below symbol
-  for (
-    const sym of [
-      ...(lineSyms[loc.line - 1] ?? []),
-      ...(lineSyms[loc.line + 1] ?? []),
-    ]
+  if (
+    [
+      ...(lineSyms[num.loc.line - 1] ?? []),
+      ...(lineSyms[num.loc.line + 1] ?? []),
+    ].some((sym) => stacked(num, sym))
   ) {
-    if (
-      (sym.loc.column >= (loc.column - 1)) &&
-      (sym.loc.column <= (loc.column + len))
-    ) {
-      return true;
-    }
+    return true;
   }
+
   return false;
 }
 
@@ -56,44 +58,27 @@ function part1(inp: Entry[]): number {
   const nums = inp.filter((e) => Object.hasOwn(e, 'num')) as Num[];
 
   let total = 0;
-  for (const { num, len, loc } of nums) {
-    if (near(len, loc, lineSyms)) {
-      total += num;
+  for (const n of nums) {
+    if (near(n, lineSyms)) {
+      total += n.num;
     }
   }
 
   return total;
 }
 
-function numsNear(sloc: Location, lineNums: Record<number, Num[]>): number[] {
-  const res: number[] = [];
-  // Left or right
-  for (const { num, len, loc } of lineNums[sloc.line] ?? []) {
-    if (sloc.column === loc.column - 1) {
-      res.push(num);
-      continue;
-    }
-    if (sloc.column === loc.column + len) {
-      res.push(num);
-      continue;
-    }
-  }
-  // Num above and below symbol
-  for (
-    const { num, len, loc } of [
-      ...(lineNums[sloc.line - 1] ?? []),
-      ...(lineNums[sloc.line + 1] ?? []),
-    ]
-  ) {
-    if (
-      (sloc.column >= (loc.column - 1)) &&
-      (sloc.column <= (loc.column + len))
-    ) {
-      res.push(num);
-    }
-  }
+function numsNear(gear: Sym, lineNums: Record<number, Num[]>): number[] {
+  const res: number[] = (lineNums[gear.loc.line] ?? [])
+    .filter((n) => adjacent(n, gear))
+    .map((n) => n.num);
 
-  return res;
+  return res.concat(
+    [
+      ...(lineNums[gear.loc.line - 1] ?? []),
+      ...(lineNums[gear.loc.line + 1] ?? []),
+    ].filter((n) => stacked(n, gear))
+      .map((n) => n.num),
+  );
 }
 
 function part2(inp: Entry[]): number {
@@ -101,14 +86,10 @@ function part2(inp: Entry[]): number {
   const nums = inp.filter((e) => Object.hasOwn(e, 'num')) as Num[];
   const lineNums = Object.groupBy(nums, (n) => n.loc.line);
 
-  let total = 0;
-  for (const g of gears) {
-    const nn = numsNear(g.loc, lineNums);
-    if (nn.length === 2) {
-      total += nn[0] * nn[1];
-    }
-  }
-  return total;
+  return gears
+    .map((g) => numsNear(g, lineNums))
+    .filter((a) => a.length === 2)
+    .reduce((t, [v0, v1]) => t + (v0 * v1), 0);
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
