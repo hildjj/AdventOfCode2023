@@ -130,7 +130,6 @@ export class Utils {
         er.message = (er as peggy.GrammarError).format([
           { source, text: text! },
         ]);
-        er.stack = '';
       }
       throw er;
     }
