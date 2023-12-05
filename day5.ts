@@ -8,10 +8,10 @@ interface Range {
   len: number;
 }
 type Mapping = [name: MapName, Range[]];
-type Almanac = [seeds: number[], mappings: Mapping[]]
+type Almanac = [seeds: number[], mappings: Mapping[]];
 
 function rangeMap(n: number, ranges: Range[]): number {
-  for (const {dest, src, len} of ranges) {
+  for (const { dest, src, len } of ranges) {
     if ((n >= src) && (n < src + len)) {
       return dest + (n - src);
     }
@@ -23,12 +23,12 @@ function part1(inp: Almanac): number {
   let nums = inp[0];
   let type = 'seed';
   while (true) {
-    const map = inp[1].find(n => n[0][0] === type);
+    const map = inp[1].find((n) => n[0][0] === type);
     if (!map) {
       break;
     }
     type = map[0][1];
-    nums = nums.map(n => rangeMap(n, map[1]))
+    nums = nums.map((n) => rangeMap(n, map[1]));
   }
   return Math.min(...nums);
 }
@@ -87,7 +87,7 @@ function part2(inp: Almanac): number {
   let type = 'seed';
   while (true) {
     // console.log(type, ranges)
-    const map = inp[1].find(n => n[0][0] === type);
+    const map = inp[1].find((n) => n[0][0] === type);
     if (!map) {
       break;
     }
@@ -107,7 +107,7 @@ export default async function main(args: MainArgs): Promise<[number, number]> {
   for (const m of inp[1]) {
     m[1].sort((a, b) => a.src - b.src);
     if (m[1][0].src !== 0) {
-      m[1].unshift({dest: 0, src: 0, len: m[1][0].src - 1})
+      m[1].unshift({ dest: 0, src: 0, len: m[1][0].src - 1 });
     }
   }
   return [part1(inp), part2(inp)];
