@@ -27,7 +27,7 @@ function part2(inp: Card[]): number {
   for (const [num, winning, have] of inp) {
     c.add(num); // Always count the current card
     const ws = new Set(winning);
-    const wins = have.filter(v => ws.has(v)).length; // Intersection length
+    const wins = have.filter((v) => ws.has(v)).length; // Intersection length
     const more = c.get(num);
     for (let i = 1; i <= wins; i++) {
       c.sum(more, num + i);

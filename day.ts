@@ -158,7 +158,5 @@ try {
     trailingComma: true,
   }));
 } catch (er) {
-  if (!er.format) {
-    console.error(er);
-  }
+  console.error(er);
 }
