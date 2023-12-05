@@ -34,7 +34,7 @@ function part2(inp: Card[]): number {
     }
     c.add(num);
     for (let i = 1; i <= f; i++) {
-      c.sum(c.get(num) ?? 0, num + i);
+      c.sum(c.get(num), num + i);
     }
   }
   return c.total();
