@@ -27,7 +27,7 @@ export class Counter<T = string> {
    */
   add(...vals: T[]): number {
     const joined = String(vals);
-    const val = (this.points[joined] || 0) + 1;
+    const val = (this.points[joined] ?? 0) + 1;
     this.points[joined] = val;
     return val;
   }
@@ -41,7 +41,7 @@ export class Counter<T = string> {
    */
   sum(count: number, ...vals: T[]): number {
     const joined = String(vals);
-    const val = (this.points[joined] || 0) + count;
+    const val = (this.points[joined] ?? 0) + count;
     this.points[joined] = val;
     return val;
   }

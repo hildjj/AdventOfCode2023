@@ -25,16 +25,12 @@ function part1(inp: Card[]): number {
 function part2(inp: Card[]): number {
   const c = new Counter<number>();
   for (const [num, winning, have] of inp) {
+    c.add(num); // Always count the current card
     const ws = new Set(winning);
-    let f = 0;
-    for (const h of have) {
-      if (ws.has(h)) {
-        f++;
-      }
-    }
-    c.add(num);
-    for (let i = 1; i <= f; i++) {
-      c.sum(c.get(num), num + i);
+    const wins = have.filter(v => ws.has(v)).length; // Intersection length
+    const more = c.get(num);
+    for (let i = 1; i <= wins; i++) {
+      c.sum(more, num + i);
     }
   }
   return c.total();
