@@ -14,9 +14,9 @@ export class Counter<T = string> {
     yield* Object.entries(this.points);
   }
 
-  get(...vals: T[]): number | undefined {
+  get(...vals: T[]): number {
     const joined = String(vals);
-    return this.points[joined];
+    return this.points[joined] ?? 0;
   }
 
   /**
