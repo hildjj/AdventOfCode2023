@@ -21,14 +21,14 @@ function part1(inp: TimeDistance[]): number {
  * Find the place between start and end where fn(t) changes values.
  */
 function findChange(
-  start: bigint,
-  end: bigint,
-  fn: (t: bigint) => boolean,
-): bigint {
+  start: number,
+  end: number,
+  fn: (t: number) => boolean,
+): number {
   while (start < end) {
-    const t2 = (start + end) / 2n;
+    const t2 = Math.floor((start + end) / 2);
     if (fn(t2)) {
-      if (!fn(t2 + 1n)) {
+      if (!fn(t2 + 1)) {
         return t2;
       }
       start = t2;
@@ -41,19 +41,19 @@ function findChange(
 }
 
 function part2(inp: TimeDistance[]): number {
-  const time = BigInt(inp.reduce((t, v) => t + String(v.time), ''));
-  const dist = BigInt(inp.reduce((t, v) => t + String(v.dist), ''));
+  const time = Number(inp.reduce((t, v) => t + String(v.time), ''));
+  const dist = Number(inp.reduce((t, v) => t + String(v.dist), ''));
 
   // Confirmed that there is only one range, which covers the midpoint.
   // Approach: start at midpoint and work out.
-  const t2 = time / 2n;
+  const t2 = time / 2;
   if (t2 * (time - t2) <= dist) {
     throw new Error('Range not near half');
   }
   const top = findChange(t2, time, (t) => t * (time - t) > dist);
-  const bottom = findChange(0n, t2, (t) => t * (time - t) <= dist);
+  const bottom = findChange(0, t2, (t) => t * (time - t) <= dist);
 
-  return Number(top - bottom);
+  return top - bottom;
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
