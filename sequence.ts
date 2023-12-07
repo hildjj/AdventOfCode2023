@@ -960,10 +960,7 @@ export class Sequence<T> {
    * @returns Object with counts of each item.
    */
   histogram(): { [id: string]: number } {
-    const counts = new Counter<T>();
-    for (const i of this.it) {
-      counts.add(i);
-    }
+    const counts = new Counter<T>().addAll(this.it);
     return counts.points;
   }
 

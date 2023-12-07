@@ -14,9 +14,34 @@ export class Counter<T = string> {
     yield* Object.entries(this.points);
   }
 
+  /**
+   * Get the current value of the given key.
+   *
+   * @param vals - The list of values that describe the thing.
+   * @returns - The current total for this thing.
+   */
   get(...vals: T[]): number {
     const joined = String(vals);
     return this.points[joined] ?? 0;
+  }
+
+  /**
+   * Get the current keys in the counter.  Returns the concatenated string
+   * values, which isn't useful unless the keys are plain strings.
+   *
+   * @returns - All of the current keys
+   */
+  keys(): string[] {
+    return Object.keys(this.points);
+  }
+
+  /**
+   * Current values.
+   *
+   * @returns - All of the current values
+   */
+  values(): number[] {
+    return Object.values(this.points);
   }
 
   /**
@@ -30,6 +55,19 @@ export class Counter<T = string> {
     const val = (this.points[joined] ?? 0) + 1;
     this.points[joined] = val;
     return val;
+  }
+
+  /**
+   * Assuming that each value is a simple non-array, add each.
+   *
+   * @param vals
+   * @returns
+   */
+  addAll(vals: Iterable<T>): this {
+    for (const v of vals) {
+      this.add(v);
+    }
+    return this;
   }
 
   /**
