@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, readAllLines } from './utils.ts';
 
 function part1(inp: string[]): number {
   return inp.reduce((t, v) => {
@@ -42,6 +42,6 @@ function part2(inp: string[]): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.readAllLines(args);
+  const inp = await readAllLines(args);
   return [part1(inp), part2(inp)];
 }

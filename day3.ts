@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, parseFile } from './utils.ts';
 
 interface Location {
   offset: number;
@@ -93,6 +93,6 @@ function part2(inp: Entry[]): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Entry[]>(args);
+  const inp = await parseFile<Entry[]>(args);
   return [part1(inp), part2(inp)];
 }

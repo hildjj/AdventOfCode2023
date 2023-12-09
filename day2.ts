@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, parseFile } from './utils.ts';
 
 interface Draw {
   red?: number;
@@ -54,6 +54,6 @@ function part2(inp: Game[]): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Game[]>(args);
+  const inp = await parseFile<Game[]>(args);
   return [part1(inp), part2(inp)];
 }

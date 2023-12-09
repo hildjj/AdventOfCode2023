@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { lcm, type MainArgs, parseFile } from './utils.ts';
 import { Sequence } from './sequence.ts';
 
 interface Entry {
@@ -31,10 +31,10 @@ function part1(inp: Input): number {
 function part2(inp: Input): number {
   const pos = Object.keys(inp.map).filter((x) => x.endsWith('A'));
   const lens = pos.map((x) => pathLength(x, /^..Z$/, inp));
-  return Utils.lcm(...lens);
+  return lcm(...lens);
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Input>(args);
+  const inp = await parseFile<Input>(args);
   return [part1(inp), part2(inp)];
 }

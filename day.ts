@@ -5,7 +5,7 @@ import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
 import { parseArgs } from '$std/cli/parse_args.ts';
-import { type MainEntry, Utils } from './utils.ts';
+import { adjacentFile, type MainEntry } from './utils.ts';
 import { Cookie, CookieJar, CookieOptions, wrapFetch } from '$jar';
 
 const YEAR = 2023;
@@ -105,7 +105,7 @@ if (args.new) {
   const input = await res.text();
 
   await $`git co -b day${args.day}`;
-  const inputFile = Utils.adjacentFile(args, 'txt', 'inputs');
+  const inputFile = adjacentFile(args, 'txt', 'inputs');
   await Deno.writeTextFile(inputFile, input);
   await $`code ${inputFile}`;
 
@@ -140,13 +140,13 @@ try {
     }).replaceAll('[ ', '[').replaceAll(' ]', ']');
 
     await Deno.writeTextFile(
-      Utils.adjacentFile(args, 'js', 'test'),
+      adjacentFile(args, 'js', 'test'),
       `export default ${str};\n`,
     );
   }
 
   if (args.test) {
-    const expected = await import(Utils.adjacentFile(args, 'js', 'test'));
+    const expected = await import(adjacentFile(args, 'js', 'test'));
     assertEquals(results, expected.default);
   }
 
