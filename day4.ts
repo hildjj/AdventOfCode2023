@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, parseFile } from './utils.ts';
 import { Counter } from './counter.ts';
 
 type Card = [
@@ -37,6 +37,6 @@ function part2(inp: Card[]): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Card[]>(args);
+  const inp = await parseFile<Card[]>(args);
   return [part1(inp), part2(inp)];
 }

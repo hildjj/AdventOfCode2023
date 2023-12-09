@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, parseFile } from './utils.ts';
 import { Counter } from './counter.ts';
 
 enum HandType {
@@ -94,6 +94,6 @@ function part2(inp: Hand[]): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Hand[]>(args);
+  const inp = await parseFile<Hand[]>(args);
   return [part1(inp), part2(inp)];
 }

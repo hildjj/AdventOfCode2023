@@ -909,28 +909,23 @@ export class Sequence<T> {
    * @param fn - Grouping predicate, called with [0], [1] then [1], [2], etc.
    * @returns
    */
-  groupBy(fn: equalityCallback<T>): Sequence<T[]> {
+  groupBy(fn: equalityCallback<T> = eqeqeq<T>): Sequence<T[]> {
     // deno-lint-ignore no-this-alias
     const that = this;
     return new Sequence({
       *[Symbol.iterator](): Generator<T[], void, undefined> {
-        // Seems like .windows(2) might work.
         let res: T[] = [];
         let first = true;
-        let prev;
-        for (const i of that) {
+        for (const [a, b] of that.windows(2)) {
           if (first) {
-            res.push(i);
+            res.push(a);
             first = false;
-            prev = i;
+          }
+          if (fn(a, b)) {
+            res.push(b);
           } else {
-            if (fn(prev as T, i)) {
-              res.push(i);
-            } else {
-              yield res;
-              res = [i];
-            }
-            prev = i;
+            yield res;
+            res = [b];
           }
         }
         if (res.length > 0) {

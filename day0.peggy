@@ -1,3 +1,4 @@
-lines = (@line "\n")*
+lines = (@num "\n")*
 
-line = n:$[^\n]* { return parseInt(n, 10) }
+num = n:$[0-9]+ { return parseInt(n, 10) }
+_ = [ \t]+

@@ -1,4 +1,4 @@
-import { type MainArgs, Utils } from './utils.ts';
+import { type MainArgs, parseFile } from './utils.ts';
 import { Sequence } from './sequence.ts';
 
 type MapName = [from: string, to: string];
@@ -103,7 +103,7 @@ function part2(inp: Almanac): number {
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
-  const inp = await Utils.parseFile<Almanac>(args);
+  const inp = await parseFile<Almanac>(args);
   for (const m of inp[1]) {
     m[1].sort((a, b) => a.src - b.src);
     if (m[1][0].src !== 0) {
