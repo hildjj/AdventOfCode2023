@@ -1,4 +1,4 @@
-export class Rect<T = string> {
+export class Rect<T> {
   #vals: T[][];
 
   constructor(wrapped: T[][]) {
