@@ -7,8 +7,11 @@ Deno.test('Counter', () => {
   assertEquals(c.size(), 0);
 
   c.add(1, 2); // 1
+  assertEquals(c.get(1, 2), 1);
+  assertEquals(c.get(33), 0);
   c.add(1, 2); // 2
   c.add(3, 4); // 1
+  assertEquals(c.keys(), ['1,2', '3,4']);
   c.sum(-5, 3, 4); // -4
   c.sum(-6, 3, 5); // -6
   assertEquals(c.total(), -8);
