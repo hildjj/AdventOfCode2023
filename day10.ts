@@ -76,7 +76,7 @@ function part1(inp: Input): number {
   return len / 2;
 }
 
-function part2(inp: Input): number {
+function part2ray(inp: Input): number {
   const r = new Rect(inp.cells);
   const state = r.map(() => '.');
 
@@ -159,7 +159,41 @@ function part2(inp: Input): number {
   return count;
 }
 
-export default async function main(args: MainArgs): Promise<[number, number]> {
+function part2(inp: Input): number {
+  // This is clearly the intended algorithm, based on part 1's clever need
+  // to divide the path length by 2.
+  const r = new Rect(inp.cells);
+
+  // Find the area using the Shoelace formula, trapezoid style:
+  // https://en.wikipedia.org/wiki/Shoelace_formula
+  let area = 0;
+  let first = true;
+  let x0 = NaN;
+  let y0 = NaN;
+  let px = NaN;
+  let py = NaN;
+  let count = 1;
+  chase(r, inp.start, (_char, x, y) => {
+    if (first) {
+      first = false;
+      x0 = x;
+      y0 = y;
+    } else {
+      area += (py + y) * (px - x);
+    }
+    px = x;
+    py = y;
+    count++;
+  });
+  area += (py + y0) * (px - x0);
+  area /= 2;
+
+  // Now, Pick's theorem to get the number of points:
+  // https://en.wikipedia.org/wiki/Pick%27s_theorem
+  return area - (count / 2) + 1 ;
+}
+
+export default async function main(args: MainArgs): Promise<[number, number, number]> {
   const inp = await parseFile<Input>(args);
-  return [part1(inp), part2(inp)];
+  return [part1(inp), part2(inp), part2ray(inp)];
 }
