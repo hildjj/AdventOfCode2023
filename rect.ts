@@ -62,10 +62,25 @@ export class Rect<T = string> {
     return new Rect(vals);
   }
 
+  *rows(): Generator<T[], undefined, undefined> {
+    yield* this.#vals;
+  }
+
+  *columns(): Generator<T[], undefined, undefined> {
+    const w = this.width();
+    for (let i = 0; i < w; i++) {
+      yield this.#vals.map((v) => v[i]);
+    }
+  }
+
+  transpose(): Rect<T> {
+    return new Rect([...this.columns()]);
+  }
+
   toString(): string {
-    return this.#vals.map((line) => line.map((v) => String(v)).join('')).join(
-      '\n',
-    );
+    return this.#vals
+      .map((line) => line.map((v) => String(v)).join(''))
+      .join('\n');
   }
 
   [Symbol.for('Deno.customInspect')](): string {
