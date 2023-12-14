@@ -120,7 +120,7 @@ function part2(inp: Input): number {
     // Diagonal lines don't have to worry about complex rules for
     // horizontal or vertical lines.
     let cross = false;
-    while (y < state.height && x < state.width(y)) {
+    while (y < state.height && x < state.width) {
       switch (state.get(x, y)) {
         case '.':
           if (cross) {
@@ -148,7 +148,7 @@ function part2(inp: Input): number {
   }
 
   // Top edge
-  for (let x = 0; x < state.width(); x++) {
+  for (let x = 0; x < state.width; x++) {
     ray(x, 0);
   }
 
