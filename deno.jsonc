@@ -4,7 +4,8 @@
     "test": "rm -rf coverage && deno test -A --coverage && deno coverage coverage --html && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*'",
     "ci": "deno test -A --coverage && deno coverage coverage --lcov --output=coverage/lcov.info",
     "update": "deno run -A https://deno.land/x/udd/main.ts deno.jsonc --dry-run",
-    "docs": "deno doc --html --name=AdventOfCode2023 counter.ts ocr.ts  sequence.ts  utils.ts"
+    "docs": "deno doc --html --name=AdventOfCode2023 counter.ts ocr.ts  sequence.ts  utils.ts",
+    "bench": "deno bench -A day.ts -- -b"
   },
   "imports": {
     "$dax": "https://deno.land/x/dax@0.35.0/mod.ts",
