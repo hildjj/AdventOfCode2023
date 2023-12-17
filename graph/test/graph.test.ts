@@ -151,7 +151,7 @@ Deno.test('Graph', async (t) => {
       },
     );
 
-    await t.step('add link adds link', (t) => {
+    await t.step('add link adds link', () => {
       const graph = new Graph<number, number, number>();
 
       const link = graph.addLink(1, 2);
@@ -458,7 +458,7 @@ Deno.test('Graph', async (t) => {
       assertSpyCalls(changeEventSpy, 1);
     });
 
-    await t.step('remove node with many links removes them all', (t) => {
+    await t.step('remove node with many links removes them all', () => {
       const graph = new Graph<number, number, number>();
       graph.addLink(1, 2);
       graph.addLink(1, 3);
@@ -490,7 +490,7 @@ Deno.test('Graph', async (t) => {
       }
     });
 
-    await t.step('remove node returns false when no node removed', (t) => {
+    await t.step('remove node returns false when no node removed', () => {
       const graph = new Graph<number, number, string>();
       graph.addNode('hello');
       const result = graph.removeNode('blah');

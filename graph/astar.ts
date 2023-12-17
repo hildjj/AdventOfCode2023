@@ -12,6 +12,7 @@ import { type NodeSearchState, StatePool } from './pool.ts';
 // var defaultSettings = require('./defaultSettings.js');
 
 export const NO_PATH = Symbol('NO_PATH');
+export { type NodeSearchState } from './pool.ts';
 
 // module.exports.l2 = heuristics.l2;
 // module.exports.l1 = heuristics.l1;
@@ -24,6 +25,11 @@ export interface AstarOptions<
   blocked?: (
     a: Node<NodeData, LinkData, NodeId>,
     b: Node<NodeData, LinkData, NodeId>,
+    l: Link<LinkData, NodeId>,
+  ) => boolean;
+  blockedPath?: (
+    cameFrom: NodeSearchState<NodeData, LinkData, NodeId>,
+    state: NodeSearchState<NodeData, LinkData, NodeId>,
     l: Link<LinkData, NodeId>,
   ) => boolean;
   heuristic?: (
@@ -60,9 +66,10 @@ export class Astar<NodeData, LinkData, NodeId extends string | number> {
     this.#graph = graph;
     this.#opts = {
       blocked: () => false,
+      blockedPath: () => false,
       heuristic: () => 0,
       distance: () => 1,
-      compare: (a, b) => Number(a.node.data) - Number(b.node.data),
+      compare: (a, b) => a.fScore - b.fScore,
       oriented: false,
       ...options,
     };
@@ -107,10 +114,12 @@ export class Astar<NodeData, LinkData, NodeId extends string | number> {
       undefined;
 
     while (openSet.length > 0) {
+      // console.log(openSet.toArray().map((o) => o.fScore));
       cameFrom = openSet.pop();
       if (!cameFrom) {
         throw new Error('Where we came from?');
       }
+
       if (goalReached(cameFrom, to)) {
         return reconstructPath(cameFrom);
       }
@@ -133,16 +142,29 @@ export class Astar<NodeData, LinkData, NodeId extends string | number> {
           // Already processed this node.
           continue;
         }
-        if (otherSearchState.open === 0) {
-          // Remember this node.
-          openSet.push(otherSearchState);
-          otherSearchState.open = 1;
-        }
-
         if (this.#opts.blocked(otherNode, cameFrom.node, link)) {
           // Path is blocked. Ignore this route
           continue;
         }
+
+        if (this.#opts.blockedPath(cameFrom, otherSearchState, link)) {
+          // Search state path is blocked
+          console.log(
+            'blocked',
+            cameFrom.parent?.node.id,
+            '->',
+            cameFrom.node.id,
+            '->',
+            otherSearchState.node.id,
+          );
+          continue;
+        }
+
+        // if (otherSearchState.open === 0) {
+        //   // Remember this node.
+        //   openSet.push(otherSearchState);
+        //   otherSearchState.open = 1;
+        // }
 
         const tentativeDistance = cameFrom.distanceToSource +
           this.#opts.distance(otherNode, cameFrom.node, link);
@@ -157,6 +179,12 @@ export class Astar<NodeData, LinkData, NodeId extends string | number> {
         otherSearchState.fScore = tentativeDistance +
           this.#opts.heuristic(otherSearchState.node, to);
 
+        // console.log(
+        //   cameFrom.node.id,
+        //   '->',
+        //   otherSearchState.node.id,
+        //   tentativeDistance,
+        // );
         // What's needed is to re-heapify, starting with otherSearchState.
         // For now, just re-push this on, and it will end up farther up the
         // tree.  We may re-processes it later, but IIRC that's ok.
