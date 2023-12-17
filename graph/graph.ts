@@ -214,7 +214,7 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
     const fromNode = this.getNode(fromId) ?? this.addNode(fromId);
     const toNode = this.getNode(toId) ?? this.addNode(toId);
 
-    const link = new Link<LinkData, NodeId>(fromId, toId, data);
+    const link = this.createLink(fromId, toId, data);
     const isUpdate = this.#links.has(link.id);
     this.#links.set(link.id, link);
 
@@ -236,7 +236,7 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
   #createSingleLink(
     fromId: NodeId,
     toId: NodeId,
-    data: LinkData,
+    data?: LinkData,
   ): Link<LinkData, NodeId> {
     const linkId = Link.makeId(fromId, toId);
     const prevLink = this.#links.get(linkId);
@@ -251,7 +251,7 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
   #createUniqueLink(
     fromId: NodeId,
     toId: NodeId,
-    data: LinkData,
+    data?: LinkData,
   ): Link<LinkData, NodeId> {
     // TODO(upstream): Find a better/faster way to store multigraphs
     let linkId = Link.makeId(fromId, toId);
@@ -329,7 +329,7 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
     yield* this.#links.values();
   }
 
-  *linkedNodes(nodeId: NodeId, oriented: boolean): Generator<
+  *linkedNodes(nodeId: NodeId, oriented = false): Generator<
     [Node<NodeData, LinkData, NodeId>, Link<LinkData, NodeId>],
     undefined,
     undefined
@@ -392,7 +392,7 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
   createLink(
     fromId: NodeId,
     toId: NodeId,
-    data: LinkData,
+    data?: LinkData,
   ): Link<LinkData, NodeId> {
     return this.#opts.multigraph
       ? this.#createUniqueLink(fromId, toId, data)

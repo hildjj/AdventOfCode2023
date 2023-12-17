@@ -1,4 +1,4 @@
-import { type MainArgs, parseFile } from './utils.ts';
+import { type MainArgs, parseFile } from './lib/utils.ts';
 
 interface Location {
   offset: number;

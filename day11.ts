@@ -1,5 +1,5 @@
-import { type MainArgs, parseFile } from './utils.ts';
-import { Sequence } from './sequence.ts';
+import { type MainArgs, parseFile } from './lib/utils.ts';
+import { Sequence } from './lib/sequence.ts';
 
 interface Location {
   line: number;

@@ -1,5 +1,5 @@
-import { type MainArgs, parseFile } from './utils.ts';
-import { Rect } from './rect.ts';
+import { type MainArgs, parseFile } from './lib/utils.ts';
+import { Rect } from './lib/rect.ts';
 
 interface Location {
   line: number;

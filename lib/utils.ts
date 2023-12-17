@@ -159,7 +159,7 @@ export function adjacentFile(
   ...dir: string[]
 ): string {
   const p = dirname(fromFileUrl(import.meta.url));
-  return join(p, ...dir, `day${args.day}.${ext}`);
+  return join(p, '..', ...dir, `day${args.day}.${ext}`);
 }
 
 /**

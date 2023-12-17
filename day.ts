@@ -5,7 +5,7 @@ import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
 import { parseArgs } from '$std/cli/parse_args.ts';
-import { adjacentFile, type MainEntry } from './utils.ts';
+import { adjacentFile, type MainEntry } from './lib/utils.ts';
 import { Cookie, CookieJar, CookieOptions, wrapFetch } from '$jar';
 
 const YEAR = 2023;

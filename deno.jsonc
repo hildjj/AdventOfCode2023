@@ -1,7 +1,7 @@
 {
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts **/*.js",
-    "test": "rm -rf coverage && deno test -A --coverage && deno coverage coverage --html && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*'",
+    "test": "rm -rf coverage && deno test -A --coverage --parallel --shuffle && deno coverage coverage --html && deno coverage coverage --lcov --output=coverage/lcov.info --exclude='test/**/*'",
     "ci": "deno test -A --coverage && deno coverage coverage --lcov --output=coverage/lcov.info",
     "update": "deno run -A https://deno.land/x/udd/main.ts deno.jsonc --dry-run",
     "docs": "deno doc --html --name=AdventOfCode2023 counter.ts ocr.ts  sequence.ts  utils.ts",

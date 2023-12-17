@@ -1,5 +1,5 @@
-import { type MainArgs, readAllLines } from './utils.ts';
-import { Rect } from './rect.ts';
+import { type MainArgs, readAllLines } from './lib/utils.ts';
+import { Rect } from './lib/rect.ts';
 
 enum Dir {
   Up,

@@ -77,7 +77,7 @@ Deno.test('Utils', async (t) => {
       },
     };
     const fn = fromFileUrl(
-      new URL('../inputs/day0.txt', import.meta.url),
+      new URL('../../inputs/day0.txt', import.meta.url),
     );
     const u = await parseFile<string[]>(defaultArgs, fn, parser);
     assertEquals(u, ['3', '4']);
