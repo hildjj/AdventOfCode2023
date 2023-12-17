@@ -5,15 +5,16 @@ import { assertEquals } from '$std/assert/mod.ts';
 import { fromFileUrl, parse as pathParse } from '$std/path/mod.ts';
 import { getCookieJar } from '$curlcookie';
 import { parseArgs } from '$std/cli/parse_args.ts';
-import { adjacentFile, type MainEntry } from './utils.ts';
+import { adjacentFile, type MainEntry } from './lib/utils.ts';
 import { Cookie, CookieJar, CookieOptions, wrapFetch } from '$jar';
 
 const YEAR = 2023;
 
 const args = parseArgs(Deno.args, {
-  boolean: ['help', 'new', 'record', 'test', 'trace', 'nowait'],
+  boolean: ['benchmark', 'help', 'new', 'record', 'test', 'trace', 'nowait'],
   string: ['day'],
   alias: {
+    b: 'benchmark',
     d: 'day',
     h: 'help',
     n: 'new',
@@ -34,6 +35,7 @@ day.ts [options] [ARGS]
 ARGS passed to day's main function as args._
 
 Options:
+  -b,--benchmark    Run benchmarks
   -d,--day <number> Day (default: latest day unless --new)
   -h,--help         Print help text and exit
   -n,--new          Wait until drop time, then scaffold today's solution
@@ -128,6 +130,11 @@ const mod = (await import(
 )).default as MainEntry<unknown>;
 
 try {
+  if (args.benchmark) {
+    Deno.bench(`Day ${args.day}`, { permissions: { read: true } }, async () => {
+      await mod(args);
+    });
+  }
   const results = await mod(args);
   if (args.record) {
     const str = Deno.inspect(results, {

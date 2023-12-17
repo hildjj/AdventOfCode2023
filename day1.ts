@@ -1,4 +1,4 @@
-import { type MainArgs, readAllLines } from './utils.ts';
+import { type MainArgs, readAllLines } from './lib/utils.ts';
 
 function part1(inp: string[]): number {
   return inp.reduce((t, v) => {

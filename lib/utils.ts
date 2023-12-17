@@ -17,6 +17,10 @@ export const defaultArgs: MainArgs = {
   _: [],
 };
 
+const grammarCache: Record<string, peggy.Parser> = {};
+const inputCache: Record<string, string> = {};
+const inputLinesCache: Record<string, string[]> = {};
+
 /**
  * Read file, parse lines.
  *
@@ -28,7 +32,7 @@ export const defaultArgs: MainArgs = {
 export async function* readLines(
   args: MainArgs,
   filename?: string,
-): AsyncGenerator<string> {
+): AsyncGenerator<string, undefined, undefined> {
   if (!filename) {
     if (args._.length > 0) {
       filename = String(args._[0]);
@@ -37,6 +41,13 @@ export async function* readLines(
     }
   }
 
+  let lines = inputLinesCache[filename];
+  if (lines) {
+    yield* lines;
+    return;
+  }
+
+  lines = [];
   const f = await Deno.open(filename);
   const ts = f.readable
     .pipeThrough(new TextDecoderStream())
@@ -45,8 +56,10 @@ export async function* readLines(
   for await (const s of ts) {
     if (s.length) {
       yield s;
+      lines.push(s);
     }
   }
+  inputLinesCache[filename] = lines;
 }
 
 /**
@@ -85,25 +98,28 @@ export async function parseFile<T>(
   input?: string,
   parser?:
     | string
-    | ((input: string, options?: peggy.ParserOptions) => unknown),
+    | peggy.Parser,
 ): Promise<T> {
   let text: string | undefined = undefined;
-  let source: string | undefined = undefined;
+  let source: string | undefined;
+
+  if (!parser) {
+    source = adjacentFile(args, 'peggy');
+  } else if (typeof parser === 'string') {
+    source = parser;
+    parser = undefined;
+  }
 
   try {
-    let parserFunc:
-      | undefined
-      | ((input: string, options?: peggy.ParserOptions) => unknown) = undefined;
-    if (typeof parser === 'function') {
-      parserFunc = parser;
-    } else {
-      source = parser ?? adjacentFile(args, 'peggy');
-      text = await Deno.readTextFile(source);
+    let compiled = (parser as peggy.Parser) ?? grammarCache[source!];
+    if (!compiled) {
+      text = await Deno.readTextFile(source!);
 
-      parserFunc = peggy.generate(text, {
+      compiled = peggy.generate(text, {
         trace: args.trace,
         grammarSource: source,
-      }).parse;
+      });
+      grammarCache[source!] = compiled;
     }
     source = input;
     if (!source) {
@@ -113,9 +129,13 @@ export async function parseFile<T>(
         source = adjacentFile(args, 'txt', 'inputs');
       }
     }
-    text = await Deno.readTextFile(source);
+    text = inputCache[source];
+    if (!text) {
+      text = await Deno.readTextFile(source);
+      inputCache[source] = text;
+    }
 
-    return parserFunc(text, {
+    return compiled.parse(text, {
       grammarSource: source,
       sourceMap: 'inline',
       format: 'es',
@@ -139,7 +159,7 @@ export function adjacentFile(
   ...dir: string[]
 ): string {
   const p = dirname(fromFileUrl(import.meta.url));
-  return join(p, ...dir, `day${args.day}.${ext}`);
+  return join(p, '..', ...dir, `day${args.day}.${ext}`);
 }
 
 /**

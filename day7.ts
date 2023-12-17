@@ -1,5 +1,5 @@
-import { type MainArgs, parseFile } from './utils.ts';
-import { Counter } from './counter.ts';
+import { type MainArgs, parseFile } from './lib/utils.ts';
+import { Counter } from './lib/counter.ts';
 
 enum HandType {
   HIGH,

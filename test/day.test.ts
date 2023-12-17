@@ -1,4 +1,4 @@
-import { defaultArgs, type MainEntry } from '../utils.ts';
+import { defaultArgs, type MainEntry } from '../lib/utils.ts';
 import { dirname } from '$std/path/dirname.ts';
 import { assertEquals } from '$std/assert/assert_equals.ts';
 

@@ -11,6 +11,7 @@ import {
 } from '../utils.ts';
 import { assertEquals, assertRejects, assertThrows } from '$std/assert/mod.ts';
 import { fromFileUrl } from '$std/path/from_file_url.ts';
+import peggy from '$peggy';
 
 const INVALID_FILE = `_____DOES___NOT___EXIST:${Deno.pid}`;
 
@@ -69,11 +70,16 @@ Deno.test('Utils', async (t) => {
     const r = await parseFile<number[]>(defaultArgs);
     assertEquals(r.length, 2000);
 
-    const parse = () => ['3', '4'];
+    const parser: peggy.Parser = {
+      SyntaxError: peggy.generate('a = "b"').SyntaxError,
+      parse(): unknown {
+        return ['3', '4'];
+      },
+    };
     const fn = fromFileUrl(
-      new URL('../inputs/day0.txt', import.meta.url),
+      new URL('../../inputs/day0.txt', import.meta.url),
     );
-    const u = await parseFile<string[]>(defaultArgs, fn, parse);
+    const u = await parseFile<string[]>(defaultArgs, fn, parser);
     assertEquals(u, ['3', '4']);
 
     await assertRejects(() => parseFile(defaultArgs, INVALID_FILE));

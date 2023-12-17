@@ -64,12 +64,14 @@ export class Rect<T = string> {
    * @throws if either invalid
    */
   #check(x: number, y: number): void {
-    if (
-      (y < 0) || (y >= this.#vals.length) ||
-      (x < 0) || (x >= this.#vals[y].length)
-    ) {
+    if (!this.check(x, y)) {
       throw new RangeError(`${x},${y} not inside rect`);
     }
+  }
+
+  check(x: number, y: number): boolean {
+    return (y >= 0) && (y < this.#vals.length) &&
+      (x >= 0) && (x < this.#vals[y].length);
   }
 
   /**
@@ -131,6 +133,18 @@ export class Rect<T = string> {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.#vals[y].length; x++) {
         callbackfn.call(this, this.get(x, y), x, y, this);
+      }
+    }
+  }
+
+  *[Symbol.iterator](): Generator<
+    [val: T, x: number, y: number],
+    undefined,
+    undefined
+  > {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.#vals[y].length; x++) {
+        yield [this.get(x, y), x, y];
       }
     }
   }

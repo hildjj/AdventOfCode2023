@@ -1,5 +1,5 @@
-import { lcm, type MainArgs, parseFile } from './utils.ts';
-import { Sequence } from './sequence.ts';
+import { lcm, type MainArgs, parseFile } from './lib/utils.ts';
+import { Sequence } from './lib/sequence.ts';
 
 interface Entry {
   L: string;

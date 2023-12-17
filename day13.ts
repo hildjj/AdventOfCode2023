@@ -1,4 +1,4 @@
-import { type MainArgs, parseFile } from './utils.ts';
+import { type MainArgs, parseFile } from './lib/utils.ts';
 
 function checkReflection(r: number[], row: number): boolean {
   for (let i = 0; (row + i < r.length) && (row - i - 1 >= 0); i++) {
