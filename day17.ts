@@ -24,12 +24,13 @@ const cardinal: [dir: Dir, dx: number, dy: number][] = [
 ];
 
 interface State {
-  energy: number;
   fScore: number;
+  energy: number;
   x: number;
   y: number;
   dir: Dir;
   dirCount: number;
+  parent?: State;
 }
 
 function find(
@@ -38,21 +39,20 @@ function find(
 ): number {
   const r = new Rect(inp);
   const [targetX, targetY] = [r.width - 1, r.height - 1];
-  const visited: Record<string, number> = {};
-
+  const visited = new Map<number, number>();
   const openSet = new BinaryHeap<State>((a, b) => a.fScore - b.fScore);
 
   openSet.push({
-    energy: 0,
     fScore: 0,
+    energy: 0,
     x: 0,
     y: 0,
     dir: Dir.Right,
     dirCount: 0,
   });
   openSet.push({
-    energy: 0,
     fScore: 0,
+    energy: 0,
     x: 0,
     y: 0,
     dir: Dir.Down,
@@ -67,33 +67,43 @@ function find(
       (cur.x === targetX) && (cur.y === targetY) &&
       cond(cur.dirCount, cur.dirCount)
     ) {
+      // Print path
+      // let p: State | undefined = cur;
+      // const view = r.map(() => '.');
+      // while (p) {
+      //   view.set(p.x, p.y, ['^', '>', 'V', '<'][p.dir]!);
+      //   p = p.parent;
+      // }
+      // console.log(view.toString());
+      // console.log();
       return cur.energy;
     }
 
-    for (
-      const [dir, dx, dy] of cardinal.filter((
-        [dir],
-      ) => (dir !== opposite[cur!.dir]))
-    ) {
+    for (const [dir, dx, dy] of cardinal) {
+      if (dir === opposite[cur.dir]) {
+        continue;
+      }
       const [x, y] = [cur.x + dx, cur.y + dy];
       const dirCount = (cur.dir === dir) ? cur.dirCount + 1 : 1;
       if (!r.check(x, y) || !cond(cur.dirCount, dirCount)) {
         continue;
       }
+      // Munge all state into a Uint32
+      const key = dirCount << 20 | dir << 16 | x << 8 | y;
+      const prev = visited.get(key) ?? Infinity;
       const energy = cur.energy + r.get(x, y);
-      const key = [x, y, dir, dirCount].join(',');
-      const prev = visited[key] ?? Infinity;
       if (energy >= prev) {
         continue;
       }
-      visited[key] = energy;
+      visited.set(key, energy);
       openSet.push({
-        energy,
         fScore: energy + (targetX - x) + (targetY - y),
+        energy,
         x,
         y,
         dir,
         dirCount,
+        parent: cur,
       });
     }
   }
