@@ -68,8 +68,13 @@ function find(
       cond(cur.dirCount, cur.dirCount)
     ) {
       // Print path
-      // let p: State | undefined = cur;
       // const view = r.map(() => '.');
+      // for (const k of visited.keys()) {
+      //   const x = (k & 0xff00) >> 8;
+      //   const y = k & 0xff;
+      //   view.set(x, y, ' ');
+      // }
+      // let p: State | undefined = cur;
       // while (p) {
       //   view.set(p.x, p.y, ['^', '>', 'V', '<'][p.dir]!);
       //   p = p.parent;
@@ -103,7 +108,8 @@ function find(
         y,
         dir,
         dirCount,
-        parent: cur,
+        // Put this back in to generate visuals
+        // parent: cur,
       });
     }
   }
@@ -116,7 +122,9 @@ function part1(inp: number[][]): number {
 }
 
 function part2(inp: number[][]): number {
-  return find(inp, (a: number, b: number) => (b > a || a >= 4) && (b < 11));
+  // We want the count to be between 4 and 10, but if less than four,
+  // we prefer longer runs in order to get to 4.
+  return find(inp, (a: number, b: number) => (a >= 4 || b > a) && (b <= 10));
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
