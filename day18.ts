@@ -1,4 +1,5 @@
 import { type MainArgs, parseFile } from './lib/utils.ts';
+import { Point } from './lib/rect.ts';
 
 interface Input {
   dir: string;
@@ -6,36 +7,31 @@ interface Input {
   color?: string;
 }
 
-const cardinal: Record<string, [number, dy: number]> = {
-  U: [0, -1],
-  R: [1, 0],
-  D: [0, 1],
-  L: [-1, 0],
+const cardinal: Record<string, Point> = {
+  U: new Point(0, -1),
+  R: new Point(1, 0),
+  D: new Point(0, 1),
+  L: new Point(-1, 0),
 };
 
 const DIR: Record<string, string> = { 0: 'R', 1: 'D', 2: 'L', 3: 'U' };
 
 function area(inp: Input[]): number {
-  let tot = 0;
-  const times = inp.length - 1;
-  let x = 0;
-  let y = 0;
-  let prevX = 0;
-  let prevY = 0;
+  let area = 0;
   let perim = 0;
-  for (let i = 0; i < times; i++) {
-    const [dx, dy] = cardinal[inp[i].dir];
-    perim += inp[i].len;
-    x += dx * inp[i].len;
-    y += dy * inp[i].len;
-    tot += (prevY + y) * (prevX - x); // Shoelace
-    prevX = x;
-    prevY = y;
+  let cur = new Point(0, 0);
+  for (const { dir, len } of inp) {
+    perim += len;
+    const prev = cur;
+    cur = prev.xlate(cardinal[dir].stretch(len));
+    area += (prev.y + cur.y) * (prev.x - cur.x); // Shoelace
   }
-  perim += x + y;
-  tot += y * x;
-  tot /= 2;
-  return tot + 1 - (perim / 2) + perim; // Pick's.
+  // Close up to 0, 0
+  perim += cur.x + cur.y;
+  area += cur.y * cur.x;
+  area /= 2; // End of shoelace
+  return area + 1 - (perim / 2) + // Pick's.
+    perim; // Add in the edge
 }
 
 function part1(inp: Input[]): number {

@@ -1,3 +1,28 @@
+export class Point {
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  xlate(d: Point): Point {
+    return new Point(this.x + d.x, this.y + d.y);
+  }
+
+  stretch(len: number): Point {
+    return new Point(this.x * len, this.y * len);
+  }
+
+  toString(): string {
+    return `${this.x},${this.y}`;
+  }
+
+  [Symbol.for('Deno.customInspect')](): string {
+    return this.toString();
+  }
+}
+
 export type RectMapCallback<T, U> = (
   value: T,
   x: number,
