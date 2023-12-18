@@ -1,17 +1,41 @@
-export class Point {
+export interface PointLike {
   x: number;
   y: number;
-  constructor(x: number, y: number) {
+}
+
+export class Point implements PointLike {
+  x: number;
+  y: number;
+
+  constructor(p: PointLike);
+  constructor(x: number, y: number);
+  constructor(xp: PointLike | number, yp?: number) {
+    const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
     this.x = x;
     this.y = y;
   }
 
-  xlate(d: Point): Point {
-    return new Point(this.x + d.x, this.y + d.y);
+  xlate(d: PointLike): Point;
+  xlate(dx: number, dy: number): Point;
+  xlate(xp: PointLike | number, yp?: number): Point {
+    const [dx, dy] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
+    return new Point(this.x + dx, this.y + dy);
   }
 
   stretch(len: number): Point {
     return new Point(this.x * len, this.y * len);
+  }
+
+  dist(p: PointLike): number {
+    return Math.sqrt(Math.abs(this.x - p.x) ** 2 + Math.abs(this.y - p.y) ** 2);
+  }
+
+  manhattan(p: PointLike): number {
+    return Math.abs(this.x - p.x) + Math.abs(this.y - p.y);
+  }
+
+  equals(p: PointLike): boolean {
+    return (this.x === p.x) && (this.y === p.y);
   }
 
   toString(): string {
@@ -88,13 +112,19 @@ export class Rect<T = string> {
    * @param y
    * @throws if either invalid
    */
-  #check(x: number, y: number): void {
+  #check(p: PointLike): void;
+  #check(x: number, y: number): void;
+  #check(xp: PointLike | number, yp?: number): void {
+    const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
     if (!this.check(x, y)) {
       throw new RangeError(`${x},${y} not inside rect`);
     }
   }
 
-  check(x: number, y: number): boolean {
+  check(p: PointLike): boolean;
+  check(x: number, y: number): boolean;
+  check(xp: PointLike | number, yp?: number): boolean {
+    const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
     return (y >= 0) && (y < this.#vals.length) &&
       (x >= 0) && (x < this.#vals[y].length);
   }
@@ -130,7 +160,10 @@ export class Rect<T = string> {
    * @param dy Difference from y
    * @returns
    */
-  get(x: number, y: number, dx = 0, dy = 0): T {
+  get(p: PointLike): T;
+  get(x: number, y: number, dx?: number, dy?: number): T;
+  get(xp: PointLike | number, yp?: number, dx = 0, dy = 0): T {
+    const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
     const col = x + dx;
     const line = y + dy;
     this.#check(col, line);
@@ -144,9 +177,16 @@ export class Rect<T = string> {
    * @param y
    * @param val
    */
-  set(x: number, y: number, val: T): void {
-    this.#check(x, y);
-    this.#vals[y][x] = val;
+  set(p: PointLike, val: T): void;
+  set(x: number, y: number, val: T): void;
+  set(xp: PointLike | number, yv: number | T, val?: T): void {
+    if ((typeof xp === 'number') && (typeof yv === 'number')) {
+      this.#check(xp, yv);
+      this.#vals[yv][xp] = val!;
+    } else {
+      this.#check(xp as PointLike);
+      this.#vals[(xp as PointLike).y][(xp as PointLike).x] = yv as T;
+    }
   }
 
   /**
@@ -170,6 +210,14 @@ export class Rect<T = string> {
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.#vals[y].length; x++) {
         yield [this.get(x, y), x, y];
+      }
+    }
+  }
+
+  *entries(): Generator<[Point, T], undefined, undefined> {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.#vals[y].length; x++) {
+        yield [new Point(x, y), this.get(x, y)];
       }
     }
   }
@@ -255,9 +303,14 @@ export class Rect<T = string> {
    * @param val new value
    * @returns Copy of rect, with [x,y] set to val
    */
-  with(x: number, y: number, val: T): Rect<T> {
+  with(p: PointLike, val: T): Rect<T>;
+  with(x: number, y: number, val: T): Rect<T>;
+  with(xp: PointLike | number, yp: number | T, val?: T): Rect<T> {
+    const [x, y, v] = (typeof xp === 'number')
+      ? [xp, yp as number, val as T]
+      : [xp.x, xp.y, val!];
     const r = this.copy();
-    r.set(x, y, val);
+    r.set(x, y, v);
     return r;
   }
 
@@ -293,7 +346,7 @@ export class Rect<T = string> {
   wrap(val: T): Rect<T> {
     const vals = structuredClone(this.#vals);
     vals.unshift(Array(this.width).fill(val));
-    vals.push(Array(this.width).fill('#'));
+    vals.push(Array(this.width).fill(val));
     return new Rect(vals.map((x: T[]) => [val, ...x, val]));
   }
 
