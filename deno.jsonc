@@ -22,10 +22,10 @@
     "semiColons": true,
     "singleQuote": true,
     "proseWrap": "preserve",
-    "exclude": ["woords/phdef.js", "docs"]
+    "exclude": ["woords/phdef.js", "graph/dot.js", "docs"]
   },
   "lint": {
-    "exclude": ["woords/phdef.js", "docs"],
+    "exclude": ["woords/phdef.js", "graph/dot.js", "docs"],
     "rules": {
       "tags": ["fresh", "recommended"],
       "exclude": ["no-await-in-loop"],
