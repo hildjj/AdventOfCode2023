@@ -1,3 +1,4 @@
+import { assert } from '$std/assert/assert.ts';
 import { type MainArgs, parseFile } from './lib/utils.ts';
 import { lcm } from './lib/utils.ts';
 
@@ -72,9 +73,7 @@ class Queue {
     }
 
     const mod = this.modules[event.to];
-    if (!mod) {
-      throw new Error(`Unknown module "${event.to}"`);
-    }
+    assert(mod);
 
     this.count++;
     if (event.pulse) {
@@ -152,10 +151,9 @@ class Terminal extends Module {
   state = false;
   firstLow = 0;
 
-  receive(event: Event, q: Queue): void {
+  receive(event: Event): void {
     if (!event.pulse) {
       this.state = true;
-      this.firstLow = q.count;
     }
   }
 }
@@ -175,29 +173,34 @@ function part1(inp: Input[]): number {
 }
 
 function part2(inp: Input[]): number {
-  const res: number[] = [];
-  const qi = new Queue();
-  qi.load(inp);
+  const q = new Queue();
+  q.load(inp);
 
-  for (const output of qi.modules[qi.modules['rx'].inputs[0]].inputs) {
-    const q = new Queue();
-    q.load(inp);
+  // rx always has one input, a conjunction with 4 inputs.
+  const inputs = q.modules[q.modules['rx'].inputs[0]].inputs.map((input) =>
+    q.factory('', input) as Terminal
+  );
 
-    // const rx = q.modules['rx'] as Terminal;
-    const outMod = q.factory('', output) as Terminal;
-
-    for (let i = 0;; i++) {
-      if (outMod.state) {
-        res.push(i);
-        break;
-      }
-      q.start();
-      while (q.tick()) {
-        // No-op
-      }
+  for (let i = 0;; i++) {
+    // Go until all of the inputs have gotten a low signal at least once,
+    // remembering the first time it happened.
+    if (
+      inputs.reduce((t, output) => {
+        if (output.state) {
+          output.firstLow ||= i;
+          return t;
+        }
+        return false;
+      }, true)
+    ) {
+      break;
+    }
+    q.start();
+    while (q.tick()) {
+      // No-op
     }
   }
-  return lcm(...res);
+  return lcm(...inputs.map((o) => o.firstLow));
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
