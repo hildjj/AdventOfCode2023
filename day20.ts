@@ -93,6 +93,7 @@ abstract class Module {
   name: string;
   outputs: string[] = [];
   inputs: string[] = [];
+  shape = '';
   static op: Op;
 
   constructor(name: string) {
@@ -114,6 +115,7 @@ abstract class Module {
 
 class Broadcaster extends Module {
   static op: Op = 'broadcaster';
+  shape = 'cylinder';
 
   receive(event: Event, q: Queue): void {
     this.send(event.pulse, q);
@@ -122,6 +124,7 @@ class Broadcaster extends Module {
 
 class FlipFlop extends Module {
   static op: Op = '%';
+  shape = 'box';
   state = false;
 
   receive(event: Event, q: Queue): void {
@@ -134,6 +137,7 @@ class FlipFlop extends Module {
 
 class Conjunction extends Module {
   static op: Op = '&';
+  shape = 'diamond';
   state: Record<string, boolean> = {};
 
   receive(event: Event, q: Queue): void {
@@ -148,6 +152,7 @@ class Conjunction extends Module {
 
 class Terminal extends Module {
   static op: Op = '';
+  shape = 'doublecircle';
   state = false;
   firstLow = 0;
 
@@ -175,6 +180,19 @@ function part1(inp: Input[]): number {
 function part2(inp: Input[]): number {
   const q = new Queue();
   q.load(inp);
+
+  // Output dot file
+  //   let dot = `\
+  // strict digraph {
+  //   button [shape=cylinder];
+  //   button -> broadcaster;
+  // `;
+  //   for (const mod of Object.values(q.modules)) {
+  //     dot += `  ${mod.name} [shape=${mod.shape}]\n`;
+  //     dot += `   ${mod.name} -> {${mod.outputs.join(', ')}}\n`;
+  //   }
+  //   dot += '}\n';
+  //   Deno.writeTextFileSync('day20.dot', dot);
 
   // rx always has one input, a conjunction with 4 inputs.
   const inputs = q.modules[q.modules['rx'].inputs[0]].inputs.map((input) =>
