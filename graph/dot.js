@@ -330,14 +330,14 @@ function peg$parse(input, options) {
   }
 };
   var peg$f5 = function(id, rhs, attr) {
-       const edgeList = [id, ...rhs.map((v) => v.id)];
+    const edgeList = [id, ...rhs.map((v) => v.id)];
 
-       return {
-         type: 'edge_stmt',
-         edgeList,
-         attrList: attr ?? []
-       };
+    return {
+      type: 'edge_stmt',
+      edgeList,
+      attrList: attr ?? []
     };
+  };
   var peg$f6 = function(edgeop, id) {
     return {
       type:'edgeRHS',

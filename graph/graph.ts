@@ -80,6 +80,13 @@ export class Link<LinkData, NodeId extends string | number = string> {
   }
 }
 
+type LinkedNodes<NodeData, LinkData, NodeId extends string | number = string> =
+  [
+    from: Node<NodeData, LinkData, NodeId>,
+    link: Link<LinkData, NodeId>,
+    to: Node<NodeData, LinkData, NodeId>,
+  ];
+
 export class Graph<NodeData, LinkData, NodeId extends string | number = string>
   extends EventEmitter<Events<NodeData, LinkData, NodeId>> {
   #opts: Required<GraphOptions>;
@@ -329,54 +336,43 @@ export class Graph<NodeData, LinkData, NodeId extends string | number = string>
     yield* this.#links.values();
   }
 
-  *linkedNodes(nodeId: NodeId, oriented = false): Generator<
-    [Node<NodeData, LinkData, NodeId>, Link<LinkData, NodeId>],
-    undefined,
-    undefined
-  > {
-    const node = this.getNode(nodeId);
+  *linkedNodes(
+    nodeId: NodeId | Node<NodeData, LinkData, NodeId>,
+    oriented = false,
+  ): Generator<LinkedNodes<NodeData, LinkData, NodeId>, undefined, undefined> {
+    const node = (nodeId instanceof Node) ? nodeId : this.getNode(nodeId);
     if (node?.links) {
       if (oriented) {
-        yield* this.#orientedLinks(node.links, nodeId);
+        yield* this.#orientedLinks(node);
       } else {
-        yield* this.#nonOrientedLinks(node.links, nodeId);
+        yield* this.#nonOrientedLinks(node);
       }
     }
   }
 
   *#nonOrientedLinks(
-    links: Set<Link<LinkData, NodeId>>,
-    nodeId: NodeId,
-  ): Generator<
-    [Node<NodeData, LinkData, NodeId>, Link<LinkData, NodeId>],
-    undefined,
-    undefined
-  > {
-    for (const link of links.values()) {
-      const linkedNodeId = link.fromId === nodeId ? link.toId : link.fromId;
-      const node = this.getNode(linkedNodeId);
-      if (!node) {
+    node: Node<NodeData, LinkData, NodeId>,
+  ): Generator<LinkedNodes<NodeData, LinkData, NodeId>, undefined, undefined> {
+    for (const link of node.links!.values()) {
+      const linkedNodeId = link.fromId === node.id ? link.toId : link.fromId;
+      const otherNode = this.getNode(linkedNodeId);
+      if (!otherNode) {
         throw new Error('Invalid link');
       }
-      yield [node, link];
+      yield [node, link, otherNode];
     }
   }
 
   *#orientedLinks(
-    links: Set<Link<LinkData, NodeId>>,
-    nodeId: NodeId,
-  ): Generator<
-    [Node<NodeData, LinkData, NodeId>, Link<LinkData, NodeId>],
-    undefined,
-    undefined
-  > {
-    for (const link of links.values()) {
-      if (link.fromId === nodeId) {
-        const node = this.getNode(link.toId);
-        if (!node) {
+    node: Node<NodeData, LinkData, NodeId>,
+  ): Generator<LinkedNodes<NodeData, LinkData, NodeId>, undefined, undefined> {
+    for (const link of node.links!.values()) {
+      if (link.fromId === node.id) {
+        const otherNode = this.getNode(link.toId);
+        if (!otherNode) {
           throw new Error('Invalid node state');
         }
-        yield [node, link];
+        yield [node, link, otherNode];
       }
     }
   }
