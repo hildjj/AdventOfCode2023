@@ -15,7 +15,7 @@ function dfs<NodeData, LinkData, NodeId extends string | number>(
   const queue: NodeId[] = [startFromNodeId];
   while (queue.length) {
     const nodeId = queue.pop()!;
-    for (const [otherNode, _link] of graph.linkedNodes(nodeId, true)) {
+    for (const [_node, _link, otherNode] of graph.linkedNodes(nodeId, true)) {
       if (visitor(otherNode)) {
         queue.push(otherNode.id);
       } else {

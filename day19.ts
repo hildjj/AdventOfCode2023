@@ -1,29 +1,29 @@
 import { type MainArgs, parseFile } from './lib/utils.ts';
 
-enum Xmas {
+export enum Xmas {
   x = 'x',
   m = 'm',
   a = 'a',
   s = 's',
 }
 
-type xmas = keyof typeof Xmas;
-const XMAS = Object.keys(Xmas) as xmas[];
+export type xmas = keyof typeof Xmas;
+export const XMAS = Object.keys(Xmas) as xmas[];
 
-interface DestWorkflow {
+export interface DestWorkflow {
   op: undefined;
   dest: string;
 }
-interface OpWorkflow {
+export interface OpWorkflow {
   op: '<' | '>';
   dest: string;
   xmas: xmas;
   num: number;
 }
 
-type Workflow = OpWorkflow | DestWorkflow;
+export type Workflow = OpWorkflow | DestWorkflow;
 
-interface Input {
+export interface Input {
   workflows: Record<string, Workflow[]>;
   parts: Record<xmas, number>[];
 }

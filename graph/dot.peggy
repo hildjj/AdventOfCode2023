@@ -70,14 +70,14 @@ attr = _ id:ID eq:(_ '=' _ @ID)? _ (',' / ';')? {
 
 edge_stmt
   = id:(subgraph / nodeId) rhs:edgeRHS attr:attrList? {
-       const edgeList = [id, ...rhs.map((v) => v.id)];
+    const edgeList = [id, ...rhs.map((v) => v.id)];
 
-       return {
-         type: 'edge_stmt',
-         edgeList,
-         attrList: attr ?? []
-       };
-    }
+    return {
+      type: 'edge_stmt',
+      edgeList,
+      attrList: attr ?? []
+    };
+  }
 
 edgeRHS
   = edgeRH+
