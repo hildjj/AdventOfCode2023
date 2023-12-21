@@ -1,5 +1,5 @@
 import { type MainArgs, readAllLines } from './lib/utils.ts';
-import { InfiniteRect, Rect } from './lib/rect.ts';
+import { InfiniteRect, Point, Rect } from './lib/rect.ts';
 import { assert } from '$std/assert/assert.ts';
 
 function part1(inp: string[][]): number {
@@ -31,25 +31,28 @@ function part2(inp: string[][]): number {
   const r = new InfiniteRect(inp);
   const S = r.indexOf('S');
   assert(S);
-  let points = [S];
 
-  const visited = new Set<string>();
+  // How much do I want JS records right now?
+  let prev = new Set<string>([S.toString()]);
   const counts = [0];
 
   for (let i = 0; i < 328; i++) {
-    visited.clear();
-    points = points.map((c) =>
-      c.cardinal()
-        .filter((c) => r.get(c) !== '#')
-        .filter((c) => {
+    const visited = new Set<string>();
+    for (const pt of prev.values()) {
+      // Shockingly, this is almost 3x faster than encoding the points as
+      // uint32 or bigUint64
+      const m = pt.match(/^([^,]+),(.+)/);
+      const p = new Point(Number(m![1]), Number(m![2]));
+      for (const c of p.cardinal()) {
+        if (r.get(c) !== '#') {
           const ps = c.toString();
           if (!visited.has(ps)) {
             visited.add(ps);
-            return true;
           }
-          return false;
-        })
-    ).flat();
+        }
+      }
+      prev = visited;
+    }
     counts.push(visited.size);
   }
 
