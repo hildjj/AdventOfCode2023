@@ -85,6 +85,46 @@ class Queue {
     mod.receive(event, this);
     return true;
   }
+
+  controllers(): string[] {
+    const terminal = Object.values(this.modules).find((m) =>
+      m instanceof Terminal
+    );
+    return terminal ? [...this.modules[terminal.inputs[0]].inputs] : [];
+  }
+
+  toDot(): void {
+    const cont = this.controllers();
+    cont.push(...this.modules['rx'].inputs, 'rx');
+    let dot = `\
+strict digraph {
+  button [shape=cylinder];
+  button -> broadcaster;
+`;
+    dot += '  subgraph cluster_terminal {\n';
+    dot += '    label = Terminal;\n';
+    dot += '    color = red;\n';
+    dot += `    node [color=red];\n`;
+
+    for (const c of cont) {
+      dot += `    ${c} [shape=${this.modules[c].shape}];\n`;
+    }
+    dot += '  };\n';
+    for (const mod of Object.values(this.modules)) {
+      if (!cont.includes(mod.name)) {
+        dot += `  ${mod.name} [shape=${mod.shape}];\n`;
+      }
+      dot += `  ${mod.name} -> {${mod.outputs.join(', ')}};\n`;
+    }
+
+    dot += `  {rank=same; ${this.modules['broadcaster'].outputs.join('; ')}}\n`;
+    cont.splice(-2, 2);
+    dot += `  {rank=same; ${
+      cont.map((c) => this.modules[c].inputs.join('; ')).join('; ')
+    };}\n`;
+    dot += '}\n';
+    Deno.writeTextFileSync('day20.dot', dot);
+  }
 }
 
 // true => High.  false => Low.
@@ -181,21 +221,10 @@ function part2(inp: Input[]): number {
   const q = new Queue();
   q.load(inp);
 
-  // Output dot file
-  //   let dot = `\
-  // strict digraph {
-  //   button [shape=cylinder];
-  //   button -> broadcaster;
-  // `;
-  //   for (const mod of Object.values(q.modules)) {
-  //     dot += `  ${mod.name} [shape=${mod.shape}]\n`;
-  //     dot += `   ${mod.name} -> {${mod.outputs.join(', ')}}\n`;
-  //   }
-  //   dot += '}\n';
-  //   Deno.writeTextFileSync('day20.dot', dot);
+  q.toDot();
 
   // rx always has one input, a conjunction with 4 inputs.
-  const inputs = q.modules[q.modules['rx'].inputs[0]].inputs.map((input) =>
+  const inputs = q.controllers().map((input) =>
     q.factory('', input) as Terminal
   );
 
