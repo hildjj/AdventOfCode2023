@@ -1,3 +1,5 @@
+import { mod } from './utils.ts';
+
 export interface PointLike {
   x: number;
   y: number;
@@ -13,6 +15,10 @@ export class Point implements PointLike {
     const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
     this.x = x;
     this.y = y;
+  }
+
+  static sort(a: Point, b: Point): number {
+    return (a.x - b.x) || (a.y - b.y);
   }
 
   xlate(d: PointLike): Point;
@@ -36,6 +42,14 @@ export class Point implements PointLike {
 
   equals(p: PointLike): boolean {
     return (this.x === p.x) && (this.y === p.y);
+  }
+
+  cardinal(): Point[] {
+    const ret: Point[] = [];
+    for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) {
+      ret.push(this.xlate(dx, dy));
+    }
+    return ret;
   }
 
   toString(): string {
@@ -337,6 +351,15 @@ export class Rect<T = string> {
     );
   }
 
+  indexOf(needle: T): Point | undefined {
+    for (const [val, x, y] of this) {
+      if (val === needle) {
+        return new Point(x, y);
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Wrap rectangle with a new value, so all outside edges are the same.
    *
@@ -381,5 +404,50 @@ export class Rect<T = string> {
 
   [Symbol.for('Deno.customInspect')](): string {
     return this.toString();
+  }
+}
+
+export class InfiniteRect<T> extends Rect<T> {
+  max: Point;
+  min: Point;
+
+  constructor(wrapped: T[][]) {
+    super(wrapped);
+    this.min = new Point(0, 0);
+    this.max = new Point(this.width, this.height);
+  }
+
+  check(_xp: PointLike | number, _yp?: number): boolean {
+    return true;
+  }
+
+  get(xp: PointLike | number, yp?: number, dx = 0, dy = 0): T {
+    const [x, y] = (typeof xp === 'number') ? [xp, yp!] : [xp.x, xp.y];
+    const col = mod(x + dx, this.width);
+    const line = mod(y + dy, this.height);
+    return super.get(col, line);
+  }
+
+  set(xp: PointLike | number, yv: number | T, val?: T): void {
+    const [x, y] = ((typeof xp === 'number') && (typeof yv === 'number'))
+      ? [xp, yv]
+      : [(xp as PointLike).x, (xp as PointLike).y];
+    const col = mod(x, this.width);
+    const line = mod(y, this.height);
+
+    this.min.x = Math.min(this.min.x, col);
+    this.min.y = Math.min(this.min.y, line);
+    this.max.x = Math.max(this.max.x, col);
+    this.max.y = Math.max(this.max.y, line);
+
+    super.set(col, line, val!);
+  }
+
+  slice(min: Point, max: Point): Rect<T> {
+    return InfiniteRect.ofSize<T>(
+      max.x - min.x + 1,
+      max.y - min.y + 1,
+      (x: number, y: number): T => this.get(x, y),
+    );
   }
 }
