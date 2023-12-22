@@ -1,5 +1,4 @@
 import { type MainArgs, parseFile } from './lib/utils.ts';
-import { Graph } from './graph/graph.ts';
 
 type Input = [
   [x: number, y: number, z: number],
@@ -37,14 +36,24 @@ class Block {
     this.end = end;
   }
 
-  get cells(): Set<string> {
-    const ret = new Set<string>();
+  *[Symbol.iterator](): Generator<
+    [x: number, y: number, z: number],
+    undefined,
+    undefined
+  > {
     for (let x = this.lowX; x <= this.highX; x++) {
       for (let y = this.lowY; y <= this.highY; y++) {
         for (let z = this.lowZ; z <= this.highZ; z++) {
-          ret.add(new Point(x, y, z).toString());
+          yield [x, y, z];
         }
       }
+    }
+  }
+
+  get cells(): Set<string> {
+    const ret = new Set<string>();
+    for (const [x, y, z] of this) {
+      ret.add(new Point(x, y, z).toString());
     }
     return ret;
   }
@@ -122,7 +131,7 @@ class Block {
   }
 }
 
-function part1(inp: Input[]): number {
+function settle(inp: Input[]): Block[] {
   const blocks = inp.map(([from, to]) =>
     new Block(new Point(...from), new Point(...to))
   );
@@ -140,7 +149,7 @@ function part1(inp: Input[]): number {
         int = b.intersect(done);
       }
       if (int.length) {
-        for (const i of int) {
+        for (const i of new Set(int).values()) {
           b.restsOn.push(i);
           i.supports.push(b);
         }
@@ -149,16 +158,36 @@ function part1(inp: Input[]): number {
       b.add(done);
     }
   }
+  return blocks;
+}
 
-  // 764 high
-  // 713 high
+function part1(inp: Input[]): number {
+  const blocks = settle(inp);
+
   return blocks.filter((b) =>
     b.supports.filter((s) => s.restsOn.length === 1).length === 0
   ).length;
 }
 
 function part2(inp: Input[]): number {
-  return inp.length;
+  const blocks = settle(inp);
+  let count = 0;
+
+  for (const b of blocks) {
+    const pending = [...b.supports];
+    const falling = new Set<string>([b.toString()]);
+
+    while (pending.length) {
+      const cur = pending.shift();
+      if (cur?.restsOn.every((o) => falling.has(o.toString()))) {
+        falling.add(cur.toString());
+        pending.push(...cur.supports);
+      }
+    }
+    count += falling.size - 1;
+  }
+
+  return count;
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
