@@ -16,6 +16,10 @@ class Point {
     this.z = z;
   }
 
+  below(): Point {
+    return new Point(this.x, this.y, this.z - 1);
+  }
+
   toString(): string {
     return `${this.x},${this.y},${this.z}`;
   }
@@ -25,51 +29,48 @@ class Point {
   }
 }
 
+function asc(a: number, b: number): number {
+  return a - b;
+}
+
 class Block {
   begin: Point;
   end: Point;
   restsOn: Block[] = [];
   supports: Block[] = [];
+  lowX: number;
+  highX: number;
+  lowY: number;
+  highY: number;
+  lowZ: number;
+  highZ: number;
 
   constructor(begin: Point, end: Point) {
     this.begin = begin;
     this.end = end;
+    [this.lowX, this.highX] = [begin.x, end.x].sort(asc);
+    [this.lowY, this.highY] = [begin.y, end.y].sort(asc);
+    [this.lowZ, this.highZ] = [begin.z, end.z].sort(asc);
   }
 
   *[Symbol.iterator](): Generator<
-    [x: number, y: number, z: number],
+    Point,
     undefined,
     undefined
   > {
     for (let x = this.lowX; x <= this.highX; x++) {
       for (let y = this.lowY; y <= this.highY; y++) {
         for (let z = this.lowZ; z <= this.highZ; z++) {
-          yield [x, y, z];
+          yield new Point(x, y, z);
         }
       }
     }
   }
 
-  get cells(): Set<string> {
-    const ret = new Set<string>();
-    for (const [x, y, z] of this) {
-      ret.add(new Point(x, y, z).toString());
-    }
-    return ret;
-  }
-
-  get diffs(): [x: number, y: number, z: number] {
-    return [
-      Math.abs(this.begin.x - this.end.x),
-      Math.abs(this.begin.y - this.end.y),
-      Math.abs(this.begin.z - this.end.z),
-    ];
-  }
-
   intersect(cells: Map<string, Block>): Block[] {
     const ret: Block[] = [];
-    for (const c of this.cells.values()) {
-      const b = cells.get(c);
+    for (const c of this) {
+      const b = cells.get(c.below().toString());
       if (b) {
         ret.push(b);
       }
@@ -78,52 +79,20 @@ class Block {
   }
 
   add(cells: Map<string, Block>): void {
-    for (const c of this.cells.values()) {
-      cells.set(c, this);
+    for (const c of this) {
+      cells.set(c.toString(), this);
     }
-  }
-
-  get length(): number {
-    const [dx, dy, dz] = this.diffs;
-    return dx + dy + dz + 1;
-  }
-
-  get lowX(): number {
-    return Math.min(this.begin.x, this.end.x);
-  }
-
-  get highX(): number {
-    return Math.max(this.begin.x, this.end.x);
-  }
-
-  get lowY(): number {
-    return Math.min(this.begin.y, this.end.y);
-  }
-
-  get highY(): number {
-    return Math.max(this.begin.y, this.end.y);
-  }
-
-  get lowZ(): number {
-    return Math.min(this.begin.z, this.end.z);
-  }
-
-  get highZ(): number {
-    return Math.max(this.begin.z, this.end.z);
   }
 
   lower(): void {
     this.begin.z--;
     this.end.z--;
-  }
-
-  raise(): void {
-    this.begin.z++;
-    this.end.z++;
+    this.lowZ--;
+    this.highZ--;
   }
 
   toString(): string {
-    return `${this.begin}->${this.end}(${this.length})`;
+    return `${this.begin}->${this.end}`;
   }
 
   [Symbol.for('Deno.customInspect')](): string {
@@ -136,6 +105,8 @@ function settle(inp: Input[]): Block[] {
     new Block(new Point(...from), new Point(...to))
   );
 
+  // If we lower the already-lowest first, there will be no collisions
+  // while falling.
   blocks.sort((a, b) => a.lowZ - b.lowZ);
   const done = new Map<string, Block>();
 
@@ -144,16 +115,21 @@ function settle(inp: Input[]): Block[] {
       b.add(done);
     } else {
       let int = b.intersect(done);
-      while (!int.length && (b.lowZ > 1)) {
+
+      // Lower the block until we would hit another block or be on the floor
+      // if lowered again.
+      while (!int.length && (b.lowZ > 2)) {
         b.lower();
         int = b.intersect(done);
       }
       if (int.length) {
+        // Might intersect the same block more than once.
         for (const i of new Set(int).values()) {
           b.restsOn.push(i);
           i.supports.push(b);
         }
-        b.raise();
+      } else {
+        b.lower();
       }
       b.add(done);
     }
@@ -161,30 +137,32 @@ function settle(inp: Input[]): Block[] {
   return blocks;
 }
 
-function part1(inp: Input[]): number {
-  const blocks = settle(inp);
-
+function part1(blocks: Block[]): number {
+  // Every block that doesn't have something that is resting on it, and only
+  // it.
   return blocks.filter((b) =>
     b.supports.filter((s) => s.restsOn.length === 1).length === 0
   ).length;
 }
 
-function part2(inp: Input[]): number {
-  const blocks = settle(inp);
+function part2(blocks: Block[]): number {
   let count = 0;
 
   for (const b of blocks) {
-    const pending = [...b.supports];
+    // Start this block falling
     const falling = new Set<string>([b.toString()]);
+    // Everything that it supports might start falling too.
+    const pending = [...b.supports];
 
-    while (pending.length) {
-      const cur = pending.shift();
-      if (cur?.restsOn.every((o) => falling.has(o.toString()))) {
+    let cur: Block | undefined;
+    while ((cur = pending.shift())) {
+      // If everything I'm on is falling, so am I.
+      if (cur.restsOn.every((o) => falling.has(o.toString()))) {
         falling.add(cur.toString());
         pending.push(...cur.supports);
       }
     }
-    count += falling.size - 1;
+    count += falling.size - 1; // Don't count the original
   }
 
   return count;
@@ -192,5 +170,6 @@ function part2(inp: Input[]): number {
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
   const inp = await parseFile<Input[]>(args);
-  return [part1(inp), part2(inp)];
+  const blocks = settle(inp);
+  return [part1(blocks), part2(blocks)];
 }
