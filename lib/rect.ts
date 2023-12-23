@@ -5,7 +5,34 @@ export interface PointLike {
   y: number;
 }
 
+export enum Dir {
+  E,
+  S,
+  W,
+  N,
+}
+
+export const AllDirs: Dir[] = [
+  Dir.E,
+  Dir.S,
+  Dir.W,
+  Dir.N,
+];
+
+export const OppositeDir: Record<Dir, Dir> = {
+  [Dir.E]: Dir.W,
+  [Dir.S]: Dir.N,
+  [Dir.W]: Dir.E,
+  [Dir.N]: Dir.S,
+};
+
 export class Point implements PointLike {
+  static CARDINAL: [dx: number, dy: number][] = [
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+  ];
   x: number;
   y: number;
 
@@ -28,6 +55,11 @@ export class Point implements PointLike {
     return new Point(this.x + dx, this.y + dy);
   }
 
+  inDir(dir: Dir): Point {
+    const [dx, dy] = Point.CARDINAL[dir as number];
+    return this.xlate(dx, dy);
+  }
+
   stretch(len: number): Point {
     return new Point(this.x * len, this.y * len);
   }
@@ -44,10 +76,14 @@ export class Point implements PointLike {
     return (this.x === p.x) && (this.y === p.y);
   }
 
-  cardinal(): Point[] {
+  cardinal(r?: Rect): Point[] {
     const ret: Point[] = [];
-    for (const [dx, dy] of [[1, 0], [0, 1], [-1, 0], [0, -1]]) {
-      ret.push(this.xlate(dx, dy));
+    for (const [dx, dy] of Point.CARDINAL) {
+      const p = this.xlate(dx, dy);
+      if (r && !r.check(p)) {
+        continue;
+      }
+      ret.push(p);
     }
     return ret;
   }
