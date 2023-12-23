@@ -80,7 +80,7 @@ export class Point implements PointLike {
     const ret: Point[] = [];
     for (const [dx, dy] of Point.CARDINAL) {
       const p = this.xlate(dx, dy);
-      if (!r?.check(p)) {
+      if (r && !r.check(p)) {
         continue;
       }
       ret.push(p);
