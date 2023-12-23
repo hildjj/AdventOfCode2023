@@ -1,6 +1,5 @@
-import { AllDirs, CARDINAL, Dir, Point, Rect } from './lib/rect.ts';
+import { Dir, Point, Rect } from './lib/rect.ts';
 import { type MainArgs, readAllLines } from './lib/utils.ts';
-import { BinaryHeap } from '$std/data_structures/binary_heap.ts';
 import { Graph } from './graph/graph.ts';
 
 interface Path {
@@ -10,13 +9,6 @@ interface Path {
   fScore: number;
   parent: Path | undefined;
 }
-
-const slopes: Record<string, Dir> = {
-  '^': Dir.N,
-  '>': Dir.E,
-  'v': Dir.S,
-  '<': Dir.W,
-};
 
 type DxDy = Record<string, [dx: number, dy: number][]>;
 const PossibleDirs: DxDy = {
@@ -88,6 +80,7 @@ function addPathLinks(r: Rect<string>, g: MyGraph, possibleDirs: DxDy): void {
         const o = g.getNode(p.toString());
         if (o) {
           g.addLink(n.id, o.id, len);
+          // Don't keep going past an adjacent node
           continue;
         }
       }
@@ -107,83 +100,7 @@ function addPathLinks(r: Rect<string>, g: MyGraph, possibleDirs: DxDy): void {
   }
 }
 
-function part1(inp: string[][]): number {
-  const r = new Rect(inp);
-  // Note: there are no dead ends to prune in the input.
-  const p = new Point(r.rows()[0].findIndex((v) => v !== '#'), 0);
-  const target = new Point(
-    r.rows()[r.height - 1].findIndex((v) => v !== '#'),
-    r.height - 1,
-  );
-
-  const pq = new BinaryHeap<Path>((a, b) => b.fScore - a.fScore);
-  pq.push({
-    p,
-    dir: Dir.S,
-    len: 0,
-    fScore: 0,
-    parent: undefined,
-  });
-
-  let cur: Path | undefined;
-  const seen = new Set<string>();
-  const dist = new Map<string, number>();
-  while ((cur = pq.pop())) {
-    const q = cur.p.inDir(cur.dir);
-    const qs = q.toString();
-
-    if (seen.has(qs)) {
-      continue;
-    }
-    seen.add(qs);
-    if (!r.check(q)) {
-      continue;
-    }
-
-    if ((dist.get(qs) ?? 0) > cur.len) {
-      continue;
-    }
-    dist.set(qs, cur.len);
-
-    const cell = r.get(q);
-    switch (cell) {
-      case '#':
-        continue;
-      case '.':
-        break;
-      default:
-        if (slopes[cell] !== cur.dir) {
-          continue;
-        }
-        break;
-    }
-
-    if (q.equals(target)) {
-      const res = cur.len + 1;
-      const t = r.copy();
-      while (cur) {
-        t.set(cur.p, 'O');
-        cur = cur.parent;
-      }
-      return res;
-    }
-
-    for (const dir of AllDirs) {
-      pq.push({
-        p: q,
-        dir,
-        len: cur.len + 1,
-        fScore: cur.len,
-        // fScore: cur.len + q.manhattan(target),
-        parent: cur,
-      });
-    }
-  }
-
-  return NaN;
-}
-
-function part2(inp: string[][]): number {
+function run(inp: string[][], possibleDirs: DxDy): number {
   const r = new Rect(inp);
   const p = new Point(r.rows()[0].findIndex((v) => v !== '#'), 0);
   const target = new Point(
@@ -195,10 +112,18 @@ function part2(inp: string[][]): number {
   g.addNode(target.toString(), target);
 
   findNodes(r, g);
-  addPathLinks(r, g, AllPossibleDirs);
+  addPathLinks(r, g, possibleDirs);
 
   // Do a depth-first search of the nodes, finding the max len
   return dfs(g, p.toString(), target.toString(), new Set<string>());
+}
+
+function part1(inp: string[][]): number {
+  return run(inp, PossibleDirs);
+}
+
+function part2(inp: string[][]): number {
+  return run(inp, AllPossibleDirs);
 }
 
 export default async function main(args: MainArgs): Promise<[number, number]> {
